@@ -1,0 +1,123 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_36",
+      "type": "series",
+      "name": "Introduction to Intelligence — Dr. John Vervaeke",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F36%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F36%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 420] In Introduction to Intelligence, a nine-hour course, Dr. John Vervaeke explores the nature of intelligence through a comprehensive cognitive science lens, examining theories from traditional computational models to modern neuroscientific frameworks. The course integrates multiple perspectives, including cognitive science, neuroscience, and artificial intelligence, with a focus on relevance realization and predictive processing as key mechanisms underlying general intelligence. We investigate how intelligence emerges from the dynamic interaction between brain architecture, cognitive processes, and environmental coupling, addressing challenges in natural and artificial intelligence. The course concludes by exploring the implications of these theories for understanding consciousness, collective intelligence, and the future of artificial general intelligence.",
+      "releaseInfo": "PSYC 420",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. John Vervaeke"
+      ]
+    },
+    {
+      "id": "sw_pa_2723",
+      "type": "series",
+      "name": "The Psychology of Self — Dr. Keith Campbell",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2723%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2723%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 250] In The Psychology of Self, a nine-hour course, Dr. Keith Campbell explores the complex nature of the self through historical, philosophical, and cultural perspectives. The lectures explore topics such as the structure of the self, self-knowledge, self-regulation, self-esteem, the narrative and relational aspects of the self, and the pursuit of growth and transcendence. Throughout the course, Dr. Campbell emphasizes understanding the self as a complex adaptive system—constantly evolving through experiences, relationships, and the pursuit of personal growth—while highlighting both the challenges and opportunities for self-development in contemporary life.",
+      "releaseInfo": "PSYC 250",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Keith Campbell"
+      ]
+    },
+    {
+      "id": "sw_pa_39",
+      "type": "series",
+      "name": "Psychology of Social Status — Dr. Rob Henderson",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F39%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F39%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 260] In the Psychology of Social Status, a seven-hour course, Dr. Henderson explores the psychology of social status, examining its evolutionary roots, developmental origins, and the fundamental role it plays in shaping human behavior. The course delves into individual differences in status-seeking, the evolutionary reasons behind status pursuit, and the complex relationships between status, envy, and emotions. It also investigates the dynamics of social status in relation to stories, plot lines, and arenas of competition, and concludes by discussing the concept of luxury beliefs and their impact on society.",
+      "releaseInfo": "PSYC 260",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Rob Henderson"
+      ]
+    },
+    {
+      "id": "sw_pa_34",
+      "type": "series",
+      "name": "How to Plan Your Life — Dr. Jordan B. Peterson",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F34%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F34%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 100] In How to Plan Your Life, a six-hour course, Dr. Jordan Peterson explores the principles of personal development, meaningful living, and psychological transformation. He examines the interplay between order and chaos, the role of boundaries and vision-setting, and how instincts and motivations shape identity. Through psychological insights, Biblical narratives, and practical strategies, the course emphasizes personal responsibility, the pursuit of meaning, and the power of individual choices. Dr. Peterson concludes by highlighting how self-reflection, courageous action, and truthful living drive transformation and shape both personal and societal growth.",
+      "releaseInfo": "PSYC 100",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Jordan B. Peterson"
+      ]
+    },
+    {
+      "id": "sw_pa_35",
+      "type": "series",
+      "name": "The Boy Crisis — Dr. Warren Farrell",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F35%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F35%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 340] In The Boy Crisis, a six-hour course, Dr. Warren Farrell explores the Boy Crisis, a phenomenon in developed nations where boys face challenges in various aspects of life. He presents evidence of this crisis and identifies five main causes: the absence of father involvement, misguided beliefs about male power and privilege, a lack of purpose, fear of psychological attachment, and a repulsion for male vulnerability. Dr. Farrell discusses the impact of these factors on boys' development, education, and future prospects, emphasizing the need for a more balanced approach to parenting and gender issues.",
+      "releaseInfo": "PSYC 340",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Warren Farrell"
+      ]
+    },
+    {
+      "id": "sw_pa_17",
+      "type": "series",
+      "name": "Brain Metabolism and Mental Health — Dr. Chris Palmer",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F17%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F17%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 340] In Brain Metabolism and Mental Health, a nine-hour course, Dr. Chris Palmer explores the brain energy theory, which suggests that mental disorders are fundamentally metabolic disorders of the brain. The lectures examine the critical role of mitochondria in mental health, highlighting their influence on neurotransmitters, inflammation, and overall brain function. The lectures also explore the complex relationship between mental illness and metabolic conditions, addressing the impact of lifestyle factors, trauma, and substance use. Key interventions discussed include the ketogenic diet and the six pillars of lifestyle medicine. The course concludes with practical strategies for improving both metabolic and mental health through a sustainable, whole-person approach focused on long-term recovery.",
+      "releaseInfo": "NEUR 340",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Chris Palmer"
+      ]
+    },
+    {
+      "id": "sw_pa_2735",
+      "type": "series",
+      "name": "The Neuroscience of Dreams — Dr. Baland Jalal",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2735%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2735%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 310] In The Neuroscience of Dreams, a seven-hour course, we embark on a fascinating exploration of sleep and dreams, delving into the neurological processes, evolutionary theories, and practical implications of these essential human experiences. Dr. Baland Jalal guides us through the stages of sleep, the neuroscience of dreaming, and various sleep disorders, while also examining the creative potential and cultural interpretations of dreams. The course highlights the importance of understanding sleep for both personal well-being and scientific inquiry, concluding with practical strategies for improving sleep quality and harnessing the power of dreams in our waking lives.",
+      "releaseInfo": "NEUR 310",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Baland Jalal"
+      ]
+    }
+  ]
+}

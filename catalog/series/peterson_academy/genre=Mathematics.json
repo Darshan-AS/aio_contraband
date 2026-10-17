@@ -1,0 +1,38 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_2725",
+      "type": "series",
+      "name": "The Fundamentals of Mathematics: Trigonometry — Dr. Robert Snellman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2725%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2725%2Fhero?tr=w-1920&alt=media",
+      "description": "[MATH 110] In The Fundamentals of Mathematics: Trigonometry, an eight-hour course, we explore the comprehensive foundations of trigonometry, beginning with basic right triangle concepts and progressing through the unit circle, complex numbers, and inverse functions. We examine the properties and graphs of all six trigonometric functions, while building towards advanced applications in solving non-right triangles through the laws of sines and cosines. The course culminates in practical applications, particularly focusing on Fourier series and their role in signal processing, demonstrating how trigonometry serves as a fundamental tool in modern technology and engineering solutions.",
+      "releaseInfo": "MATH 110",
+      "genres": [
+        "Peterson Academy",
+        "Mathematics",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Robert Snellman"
+      ]
+    },
+    {
+      "id": "sw_pa_2767",
+      "type": "series",
+      "name": "Introductory Applied Mathematics — Dr. Robert Snellman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2767%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2767%2Fhero?tr=w-1920&alt=media",
+      "description": "[MATH 210] In Introductory Applied Mathematics, an eight-hour course, Dr. Snellman teaches concepts in calculus and optimization, with a strong focus on practical applications in data science, machine learning, and real-world problem-solving. We progress from basic derivatives and limits to advanced optimization techniques, including Newton's method, the bisection method, and gradient descent. Dr. Snellman also demonstrates practical implementations of this mathematics in Python. The course also highlights how mastering these concepts provides a competitive edge in fields like business, medicine, and AI, while also reflecting on the ethical implications of their use.",
+      "releaseInfo": "MATH 210",
+      "genres": [
+        "Peterson Academy",
+        "Mathematics",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Robert Snellman"
+      ]
+    }
+  ]
+}

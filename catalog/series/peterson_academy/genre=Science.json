@@ -1,0 +1,140 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_3237",
+      "type": "series",
+      "name": "The Pharmaceutical Industry: Practices, Incentives, and Patient Awareness — Gerald Posner",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3237%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3237%2Fhero?tr=w-1920&alt=media",
+      "description": "[JOUR 350] In The Pharmaceutical Industry: Practices, Incentives, and Patient Awareness, an eight-hour course, Gerald Posner traces the pharmaceutical industry's evolution from 19th-century snake oil sellers to modern Big Pharma giants. We examine how profit-driven motives have shaped the industry through aggressive marketing, regulatory capture, and exploitation of loopholes from the Orphan Drug Act to COVID-19 partnerships. The course explores how companies target vulnerable populations, manipulate regulations, and prioritize profits over patient welfare, concluding with guidance on becoming informed healthcare consumers who recognize the financial incentives driving modern medicine.",
+      "releaseInfo": "JOUR 350",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Gerald Posner"
+      ]
+    },
+    {
+      "id": "sw_pa_9",
+      "type": "series",
+      "name": "Brain Plasticity — Dr. David Eagleman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F9%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F9%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 210] In Brain Plasticity, an eight-hour course, Dr. David Eagleman explores the brain’s remarkable ability to adapt and reshape itself throughout life. The course covers how plasticity enables the brain to fine-tune its neural circuits, from constructing dynamic maps of the body and senses to learning movement control. It also investigates how the brain processes non-traditional sensory inputs, such as \"seeing\" through the skin or \"hearing\" vibrations. Dr. Eagleman discusses the role of relevance in developing expertise, the evolution of plasticity across the lifespan, and strategies for maintaining brain health. The course concludes with insights into learning, memory, and the brain’s ability to continually adapt to a changing world.",
+      "releaseInfo": "NEUR 210",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. David Eagleman"
+      ]
+    },
+    {
+      "id": "sw_pa_2711",
+      "type": "series",
+      "name": "Astronomy 101 — Dr. Brian Keating",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2711%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2711%2Fhero?tr=w-1920&alt=media",
+      "description": "[ASTR 101] In Astronomy 101, a seven-hour course, Dr. Brian Keating launches into a fascinating exploration of the history and principles of astronomy—from ancient observations to cutting-edge discoveries. We follow the evolution of astronomical tools and techniques, the cosmic distance ladder, and the properties and life cycles of stars and galaxies. The course delves into the fundamental principles of gravity, the Big Bang theory, and the search for extraterrestrial life, while also highlighting the contributions of groundbreaking scientists and the profound impact of astronomy on our understanding of the universe and our place within it.",
+      "releaseInfo": "ASTR 101",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Brian Keating"
+      ]
+    },
+    {
+      "id": "sw_pa_2769",
+      "type": "series",
+      "name": "The Neuroscience of Human Nature — Dr. Baland Jalal",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2769%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2769%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 320] In The Neuroscience of Human Nature, an eight-hour course, Dr. Baland Jalal takes us through a fascinating examination of how the brain constructs the self, social cognition, emotion, aesthetic experience, romantic attraction, and consciousness. Through case studies and research, we delve into the complex interplay between neural structures, behavior, and subjective experience, highlighting the brain's plasticity and the role of unconscious processes. The course ultimately reveals how a deeper understanding of neuroscience can illuminate fundamental aspects of human experience, from creativity and aesthetics to free will and the nature of consciousness itself.",
+      "releaseInfo": "NEUR 320",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Baland Jalal"
+      ]
+    },
+    {
+      "id": "sw_pa_3223",
+      "type": "series",
+      "name": "Evolution, Sex & The Birth Control Pill — Dr. Sarah Hill",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3223%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3223%2Fhero?tr=w-1920&alt=media",
+      "description": "[BIO 330] In Evolution, Sex & The Birth Control Pill, an eight-hour course, Dr. Sarah Hill takes students on a deep dive into how evolutionary psychology and reproductive biology shape sex differences in human behavior, mate preferences, and hormone regulation. She explores the complex effects of hormonal birth control on women's bodies, minds, and partner choices, highlighting both its benefits and potential risks, including heightened rates of depression. The course concludes by examining the wider societal impact of birth control and underscores the critical importance of sex-aware research in medicine and beyond.",
+      "releaseInfo": "BIO 330",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Sarah Hill"
+      ]
+    },
+    {
+      "id": "sw_pa_14",
+      "type": "series",
+      "name": "Why We Get Sick — Dr. Benjamin Bikman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F14%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F14%2Fhero?tr=w-1920&alt=media",
+      "description": "[BIO 250] In Why We Get Sick, a seven-hour course, Dr. Benjamin Bikman examines the metabolic origins of chronic disease, focusing on the complex relationship between metabolic health, insulin resistance, and chronic conditions like type 2 diabetes, heart disease, Alzheimer's, fertility issues, and cancer. The lectures cover the causes and consequences of insulin resistance and challenge conventional views about disease origins. The course concludes with evidence-based solutions, highlighting the effectiveness of dietary changes, lifestyle interventions, and personalized strategies for reversing insulin resistance and improving overall metabolic health.",
+      "releaseInfo": "BIO 250",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Benjamin Bikman"
+      ]
+    },
+    {
+      "id": "sw_pa_2715",
+      "type": "series",
+      "name": "The Fundamentals of Physiology — Dr. Benjamin Bikman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2715%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2715%2Fhero?tr=w-1920&alt=media",
+      "description": "[BIO 110] In The Fundamentals of Physiology, a seven-hour course, Dr. Benjamin Bikman provides a comprehensive exploration of human physiology, beginning with cellular fundamentals and progressing through major body systems. We examine the complex mechanisms that maintain homeostasis, delve into the intricate relationships between various organ systems, and discuss clinically relevant topics and modern applications. The course offers a thorough understanding of how the human body functions and the crucial role of each system in maintaining overall health.",
+      "releaseInfo": "BIO 110",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Benjamin Bikman"
+      ]
+    },
+    {
+      "id": "sw_pa_37",
+      "type": "series",
+      "name": "Intro to Neuroscience — Dr. Baland Jalal",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F37%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F37%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 101] In Intro to Neuroscience, an eight-hour course, Dr. Jalal embarks on a captivating journey through the intricacies of the human brain, exploring its structure, function, and the fascinating phenomena it produces. We delve into topics such as the neuroscience of body image, neuroplasticity, memory, sleep, and the fascinating realm of dreams. Throughout the course, we highlight the complex interplay between the mind, brain, and body. This exploration also covers the potential clinical applications of neuroscience findings, culminating in empowering insights on how to lead a fulfilling and purposeful life.",
+      "releaseInfo": "NEUR 101",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Baland Jalal"
+      ]
+    }
+  ]
+}

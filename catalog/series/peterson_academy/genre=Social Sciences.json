@@ -1,0 +1,72 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_3242",
+      "type": "series",
+      "name": "Free Market Economics — Dr. David Henderson",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3242%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3242%2Fhero?tr=w-1920&alt=media",
+      "description": "[ECON 110] In Free Market Economics, Dr. David Henderson guides us through ten foundational pillars of economic wisdom and the major schools of thought—Austrian, Chicago, UCLA, and Public Choice. Along the way, we explore how markets coordinate through decentralized knowledge, property rights, and voluntary exchange, and why central planning so often falls short. Drawing on vivid historical cases—from the Soviet economic collapse to West Germany’s postwar miracle—the course brings core ideas like subjective value, spontaneous order, and entrepreneurial discovery to life. Ultimately, it shows how economic freedom and open inquiry fuel innovation and prosperity, while government intervention frequently produces unintended consequences and inefficiencies.",
+      "releaseInfo": "ECON 110",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. David Henderson"
+      ]
+    },
+    {
+      "id": "sw_pa_3217",
+      "type": "series",
+      "name": "Big Ideas in Psychology Part 2 — Dr. Roy Baumeister",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3217%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3217%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 221] In Big Ideas in Psychology Part 2, an eight-hour course, we continue our study of several fascinating aspects of human psychology, including our relationship with time and future-oriented thinking, the roots of evil behavior, self-destructive tendencies, and addiction mechanisms. Dr. Roy Baumeister discusses the nature of the self, and considers alternative theories of gender relations focused on complementary partnership. The course also investigates the evolutionary purpose of consciousness as a tool for internal processing and social communication, and concludes by analyzing human sexual behavior through an economic framework of supply and demand.",
+      "releaseInfo": "PSYC 221",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Roy Baumeister"
+      ]
+    },
+    {
+      "id": "sw_pa_3238",
+      "type": "series",
+      "name": "Human Progress — Dr. Marian L. Tupy",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3238%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3238%2Fhero?tr=w-1920&alt=media",
+      "description": "[ECON 221] In Human Progress, an eight-hour course, Dr. Marian Tupy explores the reality and nature of human progress through data and theory, examining major improvements in health, wealth, education, freedom, and overall quality of life over the past two centuries. We ask why pessimism persists despite overwhelming evidence of global advancement, and investigate “progressophobia” and its psychological roots. The course identifies key drivers of progress and shows how innovation has accelerated dramatically over time. We conclude by addressing critiques of progress and introducing “solutionism,” the idea that humans are problem-solving beings capable of continuous improvement through knowledge, innovation, and resilient institutions.",
+      "releaseInfo": "ECON 221",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Marian L. Tupy"
+      ]
+    },
+    {
+      "id": "sw_pa_32",
+      "type": "series",
+      "name": "Introduction to Political Science — Dr. Eric Kaufmann",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F32%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F32%2Fhero?tr=w-1920&alt=media",
+      "description": "[POLS 101] In Introduction to Political Science, an eight-hour course, we explore the fundamentals of political science, delving into comparative political institutions, electoral systems, voting behavior, and the causes of war. We examine the design of democracy in ethnically divided societies and trace the historical evolution of the modern nation-state. The course concludes by discussing the impact of globalization on the nation-state as the primary unit of human political organization.",
+      "releaseInfo": "POLS 101",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Eric Kaufmann"
+      ]
+    }
+  ]
+}

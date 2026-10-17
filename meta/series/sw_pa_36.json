@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "sw_pa_36",
+    "type": "series",
+    "name": "Introduction to Intelligence — Dr. John Vervaeke",
+    "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F36%2Fthumb?tr=h-1200&alt=media",
+    "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F36%2Fhero?tr=w-1920&alt=media",
+    "description": "[PSYC 420] In Introduction to Intelligence, a nine-hour course, Dr. John Vervaeke explores the nature of intelligence through a comprehensive cognitive science lens, examining theories from traditional computational models to modern neuroscientific frameworks. The course integrates multiple perspectives, including cognitive science, neuroscience, and artificial intelligence, with a focus on relevance realization and predictive processing as key mechanisms underlying general intelligence. We investigate how intelligence emerges from the dynamic interaction between brain architecture, cognitive processes, and environmental coupling, addressing challenges in natural and artificial intelligence. The course concludes by exploring the implications of these theories for understanding consciousness, collective intelligence, and the future of artificial general intelligence.",
+    "releaseInfo": "PSYC 420",
+    "genres": [
+      "Peterson Academy",
+      "Psychology",
+      "Education"
+    ],
+    "cast": [
+      "Dr. John Vervaeke"
+    ],
+    "videos": [
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:7",
+        "title": "1. Defining Intelligence",
+        "season": 1,
+        "episode": 1,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 64 min · Dr. John Vervaeke\n\nIn our introductory lecture, Dr. John Vervaeke delves into the nature of intelligence from a cognitive science perspective, acknowledging the lack of consensus on its definition among researchers. Dr. Vervaeke outlines his approach to formulating a strong argument for what intelligence is, based on reviewing the best theories and empirical research to provide a plausible argument grounded in cognitive science. The lecture emphasizes the importance of generalizability, multiple realizability, and avoiding the homuncular fallacy when developing theories of intelligence, drawing lessons from the history of cognitive science.",
+        "description": "⏱️ 64 min · Dr. John Vervaeke\n\nIn our introductory lecture, Dr. John Vervaeke delves into the nature of intelligence from a cognitive science perspective, acknowledging the lack of consensus on its definition among researchers. Dr. Vervaeke outlines his approach to formulating a strong argument for what intelligence is, based on reviewing the best theories and empirical research to provide a plausible argument grounded in cognitive science. The lecture emphasizes the importance of generalizability, multiple realizability, and avoiding the homuncular fallacy when developing theories of intelligence, drawing lessons from the history of cognitive science."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:5",
+        "title": "2. Models of General Intelligence",
+        "season": 1,
+        "episode": 2,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 70 min · Dr. John Vervaeke\n\nIn lecture two, we probe the ongoing debate between top-down and bottom-up models of general intelligence, examining evidence for each perspective and the challenges in resolving this debate. Dr. Vervaeke emphasizes the central role of relevance realization in cognition and intelligence, arguing that, despite its critical importance, it has remained largely implicit in theories. We explore the close relationship between working memory, consciousness, attention, and fluid intelligence, and discuss how recursive relevance realization in working memory may be the key function underlying general intelligence.",
+        "description": "⏱️ 70 min · Dr. John Vervaeke\n\nIn lecture two, we probe the ongoing debate between top-down and bottom-up models of general intelligence, examining evidence for each perspective and the challenges in resolving this debate. Dr. Vervaeke emphasizes the central role of relevance realization in cognition and intelligence, arguing that, despite its critical importance, it has remained largely implicit in theories. We explore the close relationship between working memory, consciousness, attention, and fluid intelligence, and discuss how recursive relevance realization in working memory may be the key function underlying general intelligence."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:8",
+        "title": "3. The Neuroscientific Perspective",
+        "season": 1,
+        "episode": 3,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 60 min · Dr. John Vervaeke\n\nIn lecture three, we explore the neuroscientific perspective on intelligence, focusing on the P-FIT theory, which proposes that general intelligence emerges from the dynamic integration of frontal and parietal brain areas. We examine how cognitive flexibility, involving the ability to break and make mental frames, relates to intelligence through evolutionary and developmental processes, with particular emphasis on how the brain efficiently reconfigures itself to navigate both physical and abstract problem spaces.",
+        "description": "⏱️ 60 min · Dr. John Vervaeke\n\nIn lecture three, we explore the neuroscientific perspective on intelligence, focusing on the P-FIT theory, which proposes that general intelligence emerges from the dynamic integration of frontal and parietal brain areas. We examine how cognitive flexibility, involving the ability to break and make mental frames, relates to intelligence through evolutionary and developmental processes, with particular emphasis on how the brain efficiently reconfigures itself to navigate both physical and abstract problem spaces."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:6",
+        "title": "4. Brain Dynamics",
+        "season": 1,
+        "episode": 4,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 75 min · Dr. John Vervaeke\n\nIn lecture four, we continue our exploration of cutting-edge neuroscientific theories of intelligence, focusing on how self-organizing criticality (firing patterns) and small-world topology (wiring patterns) in the brain work together to optimize information processing and cognitive flexibility. These frameworks suggest that intelligence emerges from the brain’s ability to dynamically balance between local efficiency and global adaptability through integration and differentiation. We examine how opponent processing helps maintain this balance and conclude by considering the potential implications of these theories for understanding and enhancing human intelligence.",
+        "description": "⏱️ 75 min · Dr. John Vervaeke\n\nIn lecture four, we continue our exploration of cutting-edge neuroscientific theories of intelligence, focusing on how self-organizing criticality (firing patterns) and small-world topology (wiring patterns) in the brain work together to optimize information processing and cognitive flexibility. These frameworks suggest that intelligence emerges from the brain’s ability to dynamically balance between local efficiency and global adaptability through integration and differentiation. We examine how opponent processing helps maintain this balance and conclude by considering the potential implications of these theories for understanding and enhancing human intelligence."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:4",
+        "title": "5. Introduction of AI",
+        "season": 1,
+        "episode": 5,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 78 min · Dr. John Vervaeke\n\nIn lecture five, we analyze artificial intelligence and its connection to general intelligence, tracing its evolution from the General Problem Solver project to modern AI challenges. We examine how problem-solving requires navigating combinatorially explosive search spaces and tackling the frame problem—the challenge of determining what information is relevant. Dr. Vervaeke presents relevance realization as a key mechanism for addressing these issues. The lecture concludes with a discussion of recent AI advancements, particularly large language models, while emphasizing the need for a deeper scientific understanding of general intelligence.",
+        "description": "⏱️ 78 min · Dr. John Vervaeke\n\nIn lecture five, we analyze artificial intelligence and its connection to general intelligence, tracing its evolution from the General Problem Solver project to modern AI challenges. We examine how problem-solving requires navigating combinatorially explosive search spaces and tackling the frame problem—the challenge of determining what information is relevant. Dr. Vervaeke presents relevance realization as a key mechanism for addressing these issues. The lecture concludes with a discussion of recent AI advancements, particularly large language models, while emphasizing the need for a deeper scientific understanding of general intelligence."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:2",
+        "title": "6. Evolution of AI",
+        "season": 1,
+        "episode": 6,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 71 min · Dr. John Vervaeke\n\nIn lecture six, we study the evolution of AI and cognitive science through three generations, from cognition as computation, to neural networks, and finally to dynamical systems. We examine how unsupervised learning, plasticity, and reinforcement learning contribute to overcoming challenges like the frame problem and achieving relevance realization. The lecture concludes by introducing the 4E (or 6E) cognitive science framework, which posits that intelligence emerges from the dynamic coupling between an agent and its environment through an ongoing process of sense-making.",
+        "description": "⏱️ 71 min · Dr. John Vervaeke\n\nIn lecture six, we study the evolution of AI and cognitive science through three generations, from cognition as computation, to neural networks, and finally to dynamical systems. We examine how unsupervised learning, plasticity, and reinforcement learning contribute to overcoming challenges like the frame problem and achieving relevance realization. The lecture concludes by introducing the 4E (or 6E) cognitive science framework, which posits that intelligence emerges from the dynamic coupling between an agent and its environment through an ongoing process of sense-making."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:3",
+        "title": "7. Integrated Intelligence",
+        "season": 1,
+        "episode": 7,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 64 min · Dr. John Vervaeke\n\nIn lecture seven, we investigate the integration of relevance realization theory and predictive processing to develop a comprehensive account of the nature of intelligence. Dr. Vervaeke proposes that predictive processing provides a mechanism for sensorimotor reproduction and anticipation, while relevance realization enables optimal gripping through opponent processing and trade-offs. Dr. Vervaeke culminates the discussion by drawing parallels between biological evolution and cognitive evolution.",
+        "description": "⏱️ 64 min · Dr. John Vervaeke\n\nIn lecture seven, we investigate the integration of relevance realization theory and predictive processing to develop a comprehensive account of the nature of intelligence. Dr. Vervaeke proposes that predictive processing provides a mechanism for sensorimotor reproduction and anticipation, while relevance realization enables optimal gripping through opponent processing and trade-offs. Dr. Vervaeke culminates the discussion by drawing parallels between biological evolution and cognitive evolution."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120907060:1",
+        "title": "8. The Power of Intelligence",
+        "season": 1,
+        "episode": 8,
+        "thumbnail": "https://image.mux.com/wDFqT2DRZ5l6l4gO6jRUgYIJlzJIfgqjP1mwYaGh5oM/thumbnail.jpg?width=640",
+        "overview": "⏱️ 66 min · Dr. John Vervaeke\n\nIn our eighth and final lecture, we conclude our discussion on the intricate relationship between predictive processing and relevance realization, emphasizing how their interplay gives rise to general intelligence. We explore the role of opponent processing in optimally reducing surprise, the importance of exaptation in transforming lower-level processes into higher forms of knowing, and the emergence of collective intelligence through distributed cognition. Dr. Vervaeke closes the course by highlighting the profound implications of these ideas—ranging from the roles of dreaming and psychedelics to the power of narrative, the necessity of genuine caring, and, ultimately, the potential of artificial general intelligence.",
+        "description": "⏱️ 66 min · Dr. John Vervaeke\n\nIn our eighth and final lecture, we conclude our discussion on the intricate relationship between predictive processing and relevance realization, emphasizing how their interplay gives rise to general intelligence. We explore the role of opponent processing in optimally reducing surprise, the importance of exaptation in transforming lower-level processes into higher forms of knowing, and the emergence of collective intelligence through distributed cognition. Dr. Vervaeke closes the course by highlighting the profound implications of these ideas—ranging from the roles of dreaming and psychedelics to the power of narrative, the necessity of genuine caring, and, ultimately, the potential of artificial general intelligence."
+      }
+    ]
+  }
+}

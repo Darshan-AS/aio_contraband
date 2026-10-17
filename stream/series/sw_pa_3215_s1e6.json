@@ -1,0 +1,14 @@
+{
+  "streams": [
+    {
+      "name": "Peterson Academy",
+      "title": "6. Napoleon's Invasion of Russia.mp4",
+      "infoHash": "47b0231e499481af9d2e462d961a9a4d7feb0d64",
+      "fileIdx": 5,
+      "behaviorHints": {
+        "filename": "6. Napoleon's Invasion of Russia.mp4",
+        "bingeGroup": "sw-napoleon"
+      }
+    }
+  ]
+}

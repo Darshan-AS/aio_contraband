@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "sw_pa_2725",
+    "type": "series",
+    "name": "The Fundamentals of Mathematics: Trigonometry — Dr. Robert Snellman",
+    "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2725%2Fthumb?tr=h-1200&alt=media",
+    "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2725%2Fhero?tr=w-1920&alt=media",
+    "description": "[MATH 110] In The Fundamentals of Mathematics: Trigonometry, an eight-hour course, we explore the comprehensive foundations of trigonometry, beginning with basic right triangle concepts and progressing through the unit circle, complex numbers, and inverse functions. We examine the properties and graphs of all six trigonometric functions, while building towards advanced applications in solving non-right triangles through the laws of sines and cosines. The course culminates in practical applications, particularly focusing on Fourier series and their role in signal processing, demonstrating how trigonometry serves as a fundamental tool in modern technology and engineering solutions.",
+    "releaseInfo": "MATH 110",
+    "genres": [
+      "Peterson Academy",
+      "Mathematics",
+      "Education"
+    ],
+    "cast": [
+      "Dr. Robert Snellman"
+    ],
+    "videos": [
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:8",
+        "title": "1. Trigonometric Functions",
+        "season": 1,
+        "episode": 1,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 61 min · Dr. Robert Snellman\n\nIn our introductory lecture, Dr. Snellman presents the fundamentals of trigonometry, beginning with its real-world applications like noise-canceling headphones and moving into core concepts of right triangles and the Pythagorean theorem. We examine the six trigonometric functions and their relationships to the sides of right triangles, and demonstrate practical problem-solving techniques through examples. The lecture sets up future discussions on understanding trigonometric functions as mathematical functions independent of triangles.",
+        "description": "⏱️ 61 min · Dr. Robert Snellman\n\nIn our introductory lecture, Dr. Snellman presents the fundamentals of trigonometry, beginning with its real-world applications like noise-canceling headphones and moving into core concepts of right triangles and the Pythagorean theorem. We examine the six trigonometric functions and their relationships to the sides of right triangles, and demonstrate practical problem-solving techniques through examples. The lecture sets up future discussions on understanding trigonometric functions as mathematical functions independent of triangles."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:7",
+        "title": "2. The Unit Circle",
+        "season": 1,
+        "episode": 2,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 64 min · Dr. Robert Snellman\n\nIn lecture two, we study the relationships between trigonometric functions, right triangles, and the unit circle. We examine the Pythagorean identity and its derivation, and discuss how the unit circle provides a geometric interpretation of trigonometric functions. The lecture concludes with a look at a table of values for all six trigonometric functions at standard angles (0°, 30°, 45°, 60°, 90°), including their radian measures, which form the foundation for understanding the unit circle.",
+        "description": "⏱️ 64 min · Dr. Robert Snellman\n\nIn lecture two, we study the relationships between trigonometric functions, right triangles, and the unit circle. We examine the Pythagorean identity and its derivation, and discuss how the unit circle provides a geometric interpretation of trigonometric functions. The lecture concludes with a look at a table of values for all six trigonometric functions at standard angles (0°, 30°, 45°, 60°, 90°), including their radian measures, which form the foundation for understanding the unit circle."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:4",
+        "title": "3. Trigonometric Equations",
+        "season": 1,
+        "episode": 3,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 60 min · Dr. Robert Snellman\n\nIn lecture three, we continue with the unit circle, exploring its properties, the trigonometric functions it represents, and techniques for generating its values without memorizing every point. We examine how to solve trigonometric equations using the unit circle and algebraic methods, and highlight the limitations of these approaches and the need for inverse trigonometric functions. The lecture concludes by introducing the concepts of even and odd functions in the context of cosine and sine.",
+        "description": "⏱️ 60 min · Dr. Robert Snellman\n\nIn lecture three, we continue with the unit circle, exploring its properties, the trigonometric functions it represents, and techniques for generating its values without memorizing every point. We examine how to solve trigonometric equations using the unit circle and algebraic methods, and highlight the limitations of these approaches and the need for inverse trigonometric functions. The lecture concludes by introducing the concepts of even and odd functions in the context of cosine and sine."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:3",
+        "title": "4. Complex Numbers",
+        "season": 1,
+        "episode": 4,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 62 min · Dr. Robert Snellman\n\nIn lecture four, we are introduced to complex numbers, their historical development from imaginary numbers, and their fundamental connection to trigonometry. We examine how complex numbers can be represented both algebraically and geometrically in the complex plane, and discuss their arithmetic operations, leading to the powerful relationship between complex exponentials and trigonometric functions through De Moivre's theorem.",
+        "description": "⏱️ 62 min · Dr. Robert Snellman\n\nIn lecture four, we are introduced to complex numbers, their historical development from imaginary numbers, and their fundamental connection to trigonometry. We examine how complex numbers can be represented both algebraically and geometrically in the complex plane, and discuss their arithmetic operations, leading to the powerful relationship between complex exponentials and trigonometric functions through De Moivre's theorem."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:2",
+        "title": "5. Graphing in Trigonometry",
+        "season": 1,
+        "episode": 5,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 64 min · Dr. Robert Snellman\n\nIn lecture five, we learn about graphing the trigonometric functions sine, cosine, tangent, secant, cosecant, and cotangent using the free online graphing tool Desmos. We examine the periodic nature of these functions, their key characteristics such as amplitude and period, and how to manipulate their graphs through transformations like horizontal and vertical shifts.",
+        "description": "⏱️ 64 min · Dr. Robert Snellman\n\nIn lecture five, we learn about graphing the trigonometric functions sine, cosine, tangent, secant, cosecant, and cotangent using the free online graphing tool Desmos. We examine the periodic nature of these functions, their key characteristics such as amplitude and period, and how to manipulate their graphs through transformations like horizontal and vertical shifts."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:6",
+        "title": "6. Inverse Functions",
+        "season": 1,
+        "episode": 6,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 63 min · Dr. Robert Snellman\n\nIn lecture six, Dr. Snellman covers the concept of inverse functions, focusing on how to determine if a function is invertible using the horizontal line test and the importance of domain restrictions. We examine the process of finding inverse functions through algebraic methods and apply these principles specifically to trigonometric functions, introducing arcsine, arctangent, and arccosine as the primary inverse trigonometric functions used to solve equations systematically.",
+        "description": "⏱️ 63 min · Dr. Robert Snellman\n\nIn lecture six, Dr. Snellman covers the concept of inverse functions, focusing on how to determine if a function is invertible using the horizontal line test and the importance of domain restrictions. We examine the process of finding inverse functions through algebraic methods and apply these principles specifically to trigonometric functions, introducing arcsine, arctangent, and arccosine as the primary inverse trigonometric functions used to solve equations systematically."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:5",
+        "title": "7. Laws of Sines and Cosines",
+        "season": 1,
+        "episode": 7,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 59 min · Dr. Robert Snellman\n\nIn lecture seven, we learn about the law of sines and the law of cosines, which allow us to solve for missing sides and angles in any triangle, not just right triangles. Dr. Snellman derives these laws using geometric reasoning and right triangle trigonometry, and illustrates their practical applications in aviation and endurance swimming, where accounting for crosswinds and currents is crucial for navigation and resource planning.",
+        "description": "⏱️ 59 min · Dr. Robert Snellman\n\nIn lecture seven, we learn about the law of sines and the law of cosines, which allow us to solve for missing sides and angles in any triangle, not just right triangles. Dr. Snellman derives these laws using geometric reasoning and right triangle trigonometry, and illustrates their practical applications in aviation and endurance swimming, where accounting for crosswinds and currents is crucial for navigation and resource planning."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120924150:1",
+        "title": "8. Useful Applications",
+        "season": 1,
+        "episode": 8,
+        "thumbnail": "https://image.mux.com/1KTzrU1ZuGTHpKMbzSk721h4K3tv01uWuc02kDNEj1aFs/thumbnail.jpg?width=640",
+        "overview": "⏱️ 60 min · Dr. Robert Snellman\n\nIn our eighth and final lecture, we first begin by covering notation and summation. We then explore the practical applications of trigonometry, focusing on Fourier series and their ability to approximate periodic functions using sines and cosines. Dr. Snellman demonstrates how a simple square wave function can be closely approximated by a sum of trigonometric functions, highlighting the applications for noise cancellation, audio filtering, and even security.",
+        "description": "⏱️ 60 min · Dr. Robert Snellman\n\nIn our eighth and final lecture, we first begin by covering notation and summation. We then explore the practical applications of trigonometry, focusing on Fourier series and their ability to approximate periodic functions using sines and cosines. Dr. Snellman demonstrates how a simple square wave function can be closely approximated by a sum of trigonometric functions, highlighting the applications for noise cancellation, audio filtering, and even security."
+      }
+    ]
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_3215",
+      "type": "series",
+      "name": "Napoleon — Lord Andrew Roberts",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3215%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3215%2Fhero?tr=w-1920&alt=media",
+      "description": "[HIST 402] In Napoleon, an eight-hour course, Lord Andrew Roberts presents the life and legacy of Napoleon Bonaparte. We examine his military genius demonstrated in campaigns across Europe and Egypt, his transformative reforms of French society and law, and his complex character combining ruthless ambition with intellectual depth. The course analyzes Napoleon's strategic innovations, leadership style, and ultimate downfall at Waterloo, while assessing his enduring legacy as both a visionary reformer and flawed conqueror whose influence continues to shape our understanding of leadership and modern Europe.",
+      "releaseInfo": "HIST 402",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Lord Andrew Roberts"
+      ]
+    },
+    {
+      "id": "sw_pa_3244",
+      "type": "series",
+      "name": "The Philosophy of History — Dr. James Orr",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3244%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3244%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 311] In The Philosophy of History, an eight-hour course, Dr. James Orr traces the philosophy of history from its ancient Greek origins to today’s debates over meaning, progress, and identity. Starting with the contrasting methods of Herodotus and Thucydides, we follow the evolution of historical thinking through medieval theology, Enlightenment secularism, and modern theories of change. Key figures such as Augustine, Hegel, and Marx reveal competing visions of history as divinely guided, rationally unfolding, or shaped by material forces. The course also explores 20th-century responses from Spengler and Heidegger, before turning to the collapse of grand narratives and today’s “history wars,” where the struggle to interpret the past remains deeply tied to how we understand ourselves.",
+      "releaseInfo": "PHIL 311",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. James Orr"
+      ]
+    },
+    {
+      "id": "sw_pa_3234",
+      "type": "series",
+      "name": "Ideas of the 20th Century Part 1 — Dr. Daniel Bonevac",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3234%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3234%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 215] In Ideas of the 20th Century Part 1, an eight-hour course, Dr. Daniel Bonevac explores how the Scientific, Agricultural, and Industrial Revolutions created a lasting tension between human agency and scientific determinism. We examine how this crisis of belief contributed to the erosion of traditional values and upheavals like World War I and the Russian Revolution. By examining key thinkers including Nietzsche, Marx, Freud, and modernist writers like Eliot and Fitzgerald, the course traces the search for meaning in a fractured world and shows how this struggle still shapes modern culture and politics.",
+      "releaseInfo": "PHIL 215",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Daniel Bonevac"
+      ]
+    },
+    {
+      "id": "sw_pa_38",
+      "type": "series",
+      "name": "The Nature of Capitalism — Dr. Yaron Brook",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F38%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F38%2Fhero?tr=w-1920&alt=media",
+      "description": "[ECON 240] In The Nature of Capitalism, a nine-hour course, Dr. Yaron Brook explores the origins, mechanisms, and morality of capitalism, tracing its roots in Enlightenment ideas and its transformative impact on human prosperity. The lectures examine the historical shift from pre-capitalist poverty to modern wealth, the role of economic freedom in driving innovation and growth, and common objections to capitalism. Dr. Brook concludes the course by exploring the philosophical roots of the opposition to capitalism, and emphasizes the compatibility of rational self-interest with a flourishing society.",
+      "releaseInfo": "ECON 240",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Yaron Brook"
+      ]
+    },
+    {
+      "id": "sw_pa_3235",
+      "type": "series",
+      "name": "The Centrality of Goodness — Dr. John Vervaeke",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3235%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3235%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 307] In The Centrality of Goodness, a nine-hour course, Dr. John Vervaeke presents goodness within the ancient triad of transcendentals—truth, beauty, and goodness—as pathways to Being itself, highlighting ontonormativity, or the inherent goodness of reality. We examine how modern dichotomies like mind/body and fact/value obscure this goodness, contributing to nihilism and the meaning crisis. Through key concepts like relevance realization, metanoetic passage, voluntary necessity, and anagoge, we discover practical ways to transcend these philosophical limitations and recover our capacity to perceive and participate in the goodness of the real, offering hope beyond nihilism.",
+      "releaseInfo": "PHIL 307",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. John Vervaeke"
+      ]
+    },
+    {
+      "id": "sw_pa_3226",
+      "type": "series",
+      "name": "The Philosophy of Mind — Dr. James Orr",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3226%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3226%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 301] In The Philosophy of Mind, an eight-hour course, Dr. James Orr traces how thinkers from ancient Greece to today have wrestled with the relationship between consciousness and the physical world. We explore key approaches—from Platonic dualism and Aristotelian hylomorphism to Cartesian dualism and 20th-century physicalist theories like behaviorism, identity theory, and functionalism—highlighting why reducing mind to matter remains a challenge. The course concludes by connecting these ideas to contemporary issues, including AI, mental health, and human enhancement, asking what it truly means to be human in a rapidly changing world.",
+      "releaseInfo": "PHIL 301",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. James Orr"
+      ]
+    },
+    {
+      "id": "sw_pa_2727",
+      "type": "series",
+      "name": "The History of Financial Crises — Dr. Charles Calomiris",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2727%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2727%2Fhero?tr=w-1920&alt=media",
+      "description": "[FIN 350] In The History of Financial Crises, a ten-hour course, Dr. Charles Calomiris explores the history, causes, and patterns of financial crises from ancient Rome to modern times. The lectures examine how political decisions and institutional structures fundamentally shape financial system stability and crisis vulnerability. Through detailed analysis of historical cases—including the 1929 stock market crash and modern global crises—the course highlights the factors that consistently contribute to financial instability. It concludes by identifying recurring patterns of failure in economic systems and emphasizes the need for reform to build more resilient financial structures.",
+      "releaseInfo": "FIN 350",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Charles Calomiris"
+      ]
+    },
+    {
+      "id": "sw_pa_3228",
+      "type": "series",
+      "name": "Business Leadership Ethics — Dr. Stephen R. C. Hicks",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3228%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3228%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 270] In Business Leadership Ethics, a nine-hour course, Professor Hicks explores the philosophical foundations of entrepreneurship and business leadership, examining how moral frameworks—egoism, altruism, and predation—shape leadership styles, resource management, and economic systems. We also analyze key entrepreneurial virtues such as rationality, courage, integrity, and productivity. Tracing the dramatic rise in global prosperity over the past two centuries, the course emphasizes how innovation, critical thinking, and strong character equip leaders to navigate complex ethical, economic, and political challenges in a rapidly changing world.",
+      "releaseInfo": "PHIL 270",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Stephen R. C. Hicks"
+      ]
+    },
+    {
+      "id": "sw_pa_3241",
+      "type": "series",
+      "name": "Thomas Aquinas — Bishop Robert Barron",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3241%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3241%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 330] In Thomas Aquinas, a seven-hour course, Bishop Robert Barron guides us through a study of the theological and philosophical system of Thomas Aquinas, the 13th-century Dominican friar who masterfully synthesized Ancient Greek philosophy with Christian doctrine. We examine his Five Ways for demonstrating God's existence, his understanding of divine attributes and the Trinity, and his teachings on creation, providence, and the problem of evil. The course delves into Aquinas's philosophical anthropology, particularly the relationship between body and soul and humanity's creation in God's image. We conclude by studying his ethical framework centered on finding happiness in God as humanity's ultimate goal, and the role of virtues in ordering human life toward God.",
+      "releaseInfo": "PHIL 330",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Bishop Robert Barron"
+      ]
+    },
+    {
+      "id": "sw_pa_3239",
+      "type": "series",
+      "name": "The Philosophy of Science — Dr. James Orr",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3239%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3239%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 404] In The Philosophy of Science, an eight-hour course, Dr. James Orr traces the development of science from ancient Greece through the Scientific Revolution to today. He examines how theological, institutional, and philosophical forces shaped science, while tackling key issues like the demarcation problem of science versus pseudoscience, Hume’s problem of induction, Kuhn’s theory of paradigm shifts, and the realism debate. The course also engages fascinating unresolved questions raised by cosmology, neuroscience, and quantum mechanics, ultimately arguing that scientific progress does not eliminate philosophical inquiry but rather deepens it, revealing new mysteries that demand philosophical analysis.",
+      "releaseInfo": "PHIL 404",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. James Orr"
+      ]
+    },
+    {
+      "id": "sw_pa_25",
+      "type": "series",
+      "name": "The Shakespearean Tragedies — Dr. Andrew Doyle",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F25%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F25%2Fhero?tr=w-1920&alt=media",
+      "description": "[ENGL 310] In The Shakespearean Tragedies, an eight-hour course, Dr. Andrew Doyle guides us through the genius of William Shakespeare, exploring the historical context that shaped his works and his unmatched talent for creating complex, timeless characters. We examine the themes, subversions, and intricacies of plays like Hamlet, King Lear, Macbeth, Romeo and Juliet, Antony and Cleopatra, and Julius Caesar. The course emphasizes Shakespeare's mastery of language, deep insight into the human heart, and his ability to challenge audiences, cementing his lasting influence on literature and culture.",
+      "releaseInfo": "ENGL 310",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Andrew Doyle"
+      ]
+    },
+    {
+      "id": "sw_pa_3216",
+      "type": "series",
+      "name": "Introduction to Music Theory — Samuel Andreyev",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3216%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3216%2Fhero?tr=w-1920&alt=media",
+      "description": "[MUS 101] In Introduction to Music Theory, an eight-hour course, Samuel Andreyev takes us through the foundations of Western music theory, from the five-line staff system and rhythmic notation to pitch, intervals, scales, and harmony. We examine how music creates movement through consonance and dissonance, cadences, voice leading, and formal structures, while developing practical skills like ear training and score analysis. The course emphasizes that music theory serves as a descriptive language rather than prescriptive rules, enabling musicians to communicate across time and cultures while acknowledging that notation remains an abstraction of embodied musical experience.",
+      "releaseInfo": "MUS 101",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Samuel Andreyev"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_44",
+      "type": "series",
+      "name": "Winston Churchill: The Roaming Lion — Dr. Larry P. Arnn",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F44%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F44%2Fhero?tr=w-1920&alt=media",
+      "description": "[HIST 450] In Winston Churchill: The Roaming Lion, a six-hour course, Dr. Larry Arnn examines Winston Churchill's life, philosophy, and political legacy through a comprehensive analysis of his military experiences, leadership principles, and views on governance. The lectures explore Churchill's evolution from a soldier-writer to a statesman, highlighting his perspectives on warfare, democracy, and individual liberty, while examining how Britain's geography and history shaped his strategic thinking. The course delves into Churchill's complex political philosophy, including his approach to just war, constitutional government, and the balance between social welfare and individual freedom.",
+      "releaseInfo": "HIST 450",
+      "genres": [
+        "Peterson Academy",
+        "History",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Larry P. Arnn"
+      ]
+    },
+    {
+      "id": "sw_pa_10",
+      "type": "series",
+      "name": "The Greatest Leaders in History — Lord Andrew Roberts",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F10%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F10%2Fhero?tr=w-1920&alt=media",
+      "description": "[HIST 320] In The Greatest Leaders in History, an eight-hour course, Lord Andrew Roberts explores the lives and leadership of eight extraordinary figures: Pericles, Julius Caesar, Napoleon Bonaparte, Horatio Nelson, Winston Churchill, George C. Marshall, Dwight D. Eisenhower, and Margaret Thatcher. Through examining their military victories, political reforms, and personal qualities, we gain insights into the nature of effective leadership across different eras and contexts. The course highlights the importance of strategic vision, moral courage, oratorical skills, and the ability to inspire and manage strong personalities while pursuing decisive goals.",
+      "releaseInfo": "HIST 320",
+      "genres": [
+        "Peterson Academy",
+        "History",
+        "Education"
+      ],
+      "cast": [
+        "Lord Andrew Roberts"
+      ]
+    }
+  ]
+}

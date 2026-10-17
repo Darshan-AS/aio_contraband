@@ -1,0 +1,684 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_3215",
+      "type": "series",
+      "name": "Napoleon — Lord Andrew Roberts",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3215%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3215%2Fhero?tr=w-1920&alt=media",
+      "description": "[HIST 402] In Napoleon, an eight-hour course, Lord Andrew Roberts presents the life and legacy of Napoleon Bonaparte. We examine his military genius demonstrated in campaigns across Europe and Egypt, his transformative reforms of French society and law, and his complex character combining ruthless ambition with intellectual depth. The course analyzes Napoleon's strategic innovations, leadership style, and ultimate downfall at Waterloo, while assessing his enduring legacy as both a visionary reformer and flawed conqueror whose influence continues to shape our understanding of leadership and modern Europe.",
+      "releaseInfo": "HIST 402",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Lord Andrew Roberts"
+      ]
+    },
+    {
+      "id": "sw_pa_3237",
+      "type": "series",
+      "name": "The Pharmaceutical Industry: Practices, Incentives, and Patient Awareness — Gerald Posner",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3237%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3237%2Fhero?tr=w-1920&alt=media",
+      "description": "[JOUR 350] In The Pharmaceutical Industry: Practices, Incentives, and Patient Awareness, an eight-hour course, Gerald Posner traces the pharmaceutical industry's evolution from 19th-century snake oil sellers to modern Big Pharma giants. We examine how profit-driven motives have shaped the industry through aggressive marketing, regulatory capture, and exploitation of loopholes from the Orphan Drug Act to COVID-19 partnerships. The course explores how companies target vulnerable populations, manipulate regulations, and prioritize profits over patient welfare, concluding with guidance on becoming informed healthcare consumers who recognize the financial incentives driving modern medicine.",
+      "releaseInfo": "JOUR 350",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Gerald Posner"
+      ]
+    },
+    {
+      "id": "sw_pa_3244",
+      "type": "series",
+      "name": "The Philosophy of History — Dr. James Orr",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3244%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3244%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 311] In The Philosophy of History, an eight-hour course, Dr. James Orr traces the philosophy of history from its ancient Greek origins to today’s debates over meaning, progress, and identity. Starting with the contrasting methods of Herodotus and Thucydides, we follow the evolution of historical thinking through medieval theology, Enlightenment secularism, and modern theories of change. Key figures such as Augustine, Hegel, and Marx reveal competing visions of history as divinely guided, rationally unfolding, or shaped by material forces. The course also explores 20th-century responses from Spengler and Heidegger, before turning to the collapse of grand narratives and today’s “history wars,” where the struggle to interpret the past remains deeply tied to how we understand ourselves.",
+      "releaseInfo": "PHIL 311",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. James Orr"
+      ]
+    },
+    {
+      "id": "sw_pa_3242",
+      "type": "series",
+      "name": "Free Market Economics — Dr. David Henderson",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3242%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3242%2Fhero?tr=w-1920&alt=media",
+      "description": "[ECON 110] In Free Market Economics, Dr. David Henderson guides us through ten foundational pillars of economic wisdom and the major schools of thought—Austrian, Chicago, UCLA, and Public Choice. Along the way, we explore how markets coordinate through decentralized knowledge, property rights, and voluntary exchange, and why central planning so often falls short. Drawing on vivid historical cases—from the Soviet economic collapse to West Germany’s postwar miracle—the course brings core ideas like subjective value, spontaneous order, and entrepreneurial discovery to life. Ultimately, it shows how economic freedom and open inquiry fuel innovation and prosperity, while government intervention frequently produces unintended consequences and inefficiencies.",
+      "releaseInfo": "ECON 110",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. David Henderson"
+      ]
+    },
+    {
+      "id": "sw_pa_3234",
+      "type": "series",
+      "name": "Ideas of the 20th Century Part 1 — Dr. Daniel Bonevac",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3234%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3234%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 215] In Ideas of the 20th Century Part 1, an eight-hour course, Dr. Daniel Bonevac explores how the Scientific, Agricultural, and Industrial Revolutions created a lasting tension between human agency and scientific determinism. We examine how this crisis of belief contributed to the erosion of traditional values and upheavals like World War I and the Russian Revolution. By examining key thinkers including Nietzsche, Marx, Freud, and modernist writers like Eliot and Fitzgerald, the course traces the search for meaning in a fractured world and shows how this struggle still shapes modern culture and politics.",
+      "releaseInfo": "PHIL 215",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Daniel Bonevac"
+      ]
+    },
+    {
+      "id": "sw_pa_9",
+      "type": "series",
+      "name": "Brain Plasticity — Dr. David Eagleman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F9%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F9%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 210] In Brain Plasticity, an eight-hour course, Dr. David Eagleman explores the brain’s remarkable ability to adapt and reshape itself throughout life. The course covers how plasticity enables the brain to fine-tune its neural circuits, from constructing dynamic maps of the body and senses to learning movement control. It also investigates how the brain processes non-traditional sensory inputs, such as \"seeing\" through the skin or \"hearing\" vibrations. Dr. Eagleman discusses the role of relevance in developing expertise, the evolution of plasticity across the lifespan, and strategies for maintaining brain health. The course concludes with insights into learning, memory, and the brain’s ability to continually adapt to a changing world.",
+      "releaseInfo": "NEUR 210",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. David Eagleman"
+      ]
+    },
+    {
+      "id": "sw_pa_3217",
+      "type": "series",
+      "name": "Big Ideas in Psychology Part 2 — Dr. Roy Baumeister",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3217%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3217%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 221] In Big Ideas in Psychology Part 2, an eight-hour course, we continue our study of several fascinating aspects of human psychology, including our relationship with time and future-oriented thinking, the roots of evil behavior, self-destructive tendencies, and addiction mechanisms. Dr. Roy Baumeister discusses the nature of the self, and considers alternative theories of gender relations focused on complementary partnership. The course also investigates the evolutionary purpose of consciousness as a tool for internal processing and social communication, and concludes by analyzing human sexual behavior through an economic framework of supply and demand.",
+      "releaseInfo": "PSYC 221",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Roy Baumeister"
+      ]
+    },
+    {
+      "id": "sw_pa_44",
+      "type": "series",
+      "name": "Winston Churchill: The Roaming Lion — Dr. Larry P. Arnn",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F44%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F44%2Fhero?tr=w-1920&alt=media",
+      "description": "[HIST 450] In Winston Churchill: The Roaming Lion, a six-hour course, Dr. Larry Arnn examines Winston Churchill's life, philosophy, and political legacy through a comprehensive analysis of his military experiences, leadership principles, and views on governance. The lectures explore Churchill's evolution from a soldier-writer to a statesman, highlighting his perspectives on warfare, democracy, and individual liberty, while examining how Britain's geography and history shaped his strategic thinking. The course delves into Churchill's complex political philosophy, including his approach to just war, constitutional government, and the balance between social welfare and individual freedom.",
+      "releaseInfo": "HIST 450",
+      "genres": [
+        "Peterson Academy",
+        "History",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Larry P. Arnn"
+      ]
+    },
+    {
+      "id": "sw_pa_36",
+      "type": "series",
+      "name": "Introduction to Intelligence — Dr. John Vervaeke",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F36%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F36%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 420] In Introduction to Intelligence, a nine-hour course, Dr. John Vervaeke explores the nature of intelligence through a comprehensive cognitive science lens, examining theories from traditional computational models to modern neuroscientific frameworks. The course integrates multiple perspectives, including cognitive science, neuroscience, and artificial intelligence, with a focus on relevance realization and predictive processing as key mechanisms underlying general intelligence. We investigate how intelligence emerges from the dynamic interaction between brain architecture, cognitive processes, and environmental coupling, addressing challenges in natural and artificial intelligence. The course concludes by exploring the implications of these theories for understanding consciousness, collective intelligence, and the future of artificial general intelligence.",
+      "releaseInfo": "PSYC 420",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. John Vervaeke"
+      ]
+    },
+    {
+      "id": "sw_pa_38",
+      "type": "series",
+      "name": "The Nature of Capitalism — Dr. Yaron Brook",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F38%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F38%2Fhero?tr=w-1920&alt=media",
+      "description": "[ECON 240] In The Nature of Capitalism, a nine-hour course, Dr. Yaron Brook explores the origins, mechanisms, and morality of capitalism, tracing its roots in Enlightenment ideas and its transformative impact on human prosperity. The lectures examine the historical shift from pre-capitalist poverty to modern wealth, the role of economic freedom in driving innovation and growth, and common objections to capitalism. Dr. Brook concludes the course by exploring the philosophical roots of the opposition to capitalism, and emphasizes the compatibility of rational self-interest with a flourishing society.",
+      "releaseInfo": "ECON 240",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Yaron Brook"
+      ]
+    },
+    {
+      "id": "sw_pa_3235",
+      "type": "series",
+      "name": "The Centrality of Goodness — Dr. John Vervaeke",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3235%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3235%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 307] In The Centrality of Goodness, a nine-hour course, Dr. John Vervaeke presents goodness within the ancient triad of transcendentals—truth, beauty, and goodness—as pathways to Being itself, highlighting ontonormativity, or the inherent goodness of reality. We examine how modern dichotomies like mind/body and fact/value obscure this goodness, contributing to nihilism and the meaning crisis. Through key concepts like relevance realization, metanoetic passage, voluntary necessity, and anagoge, we discover practical ways to transcend these philosophical limitations and recover our capacity to perceive and participate in the goodness of the real, offering hope beyond nihilism.",
+      "releaseInfo": "PHIL 307",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. John Vervaeke"
+      ]
+    },
+    {
+      "id": "sw_pa_3226",
+      "type": "series",
+      "name": "The Philosophy of Mind — Dr. James Orr",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3226%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3226%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 301] In The Philosophy of Mind, an eight-hour course, Dr. James Orr traces how thinkers from ancient Greece to today have wrestled with the relationship between consciousness and the physical world. We explore key approaches—from Platonic dualism and Aristotelian hylomorphism to Cartesian dualism and 20th-century physicalist theories like behaviorism, identity theory, and functionalism—highlighting why reducing mind to matter remains a challenge. The course concludes by connecting these ideas to contemporary issues, including AI, mental health, and human enhancement, asking what it truly means to be human in a rapidly changing world.",
+      "releaseInfo": "PHIL 301",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. James Orr"
+      ]
+    },
+    {
+      "id": "sw_pa_3238",
+      "type": "series",
+      "name": "Human Progress — Dr. Marian L. Tupy",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3238%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3238%2Fhero?tr=w-1920&alt=media",
+      "description": "[ECON 221] In Human Progress, an eight-hour course, Dr. Marian Tupy explores the reality and nature of human progress through data and theory, examining major improvements in health, wealth, education, freedom, and overall quality of life over the past two centuries. We ask why pessimism persists despite overwhelming evidence of global advancement, and investigate “progressophobia” and its psychological roots. The course identifies key drivers of progress and shows how innovation has accelerated dramatically over time. We conclude by addressing critiques of progress and introducing “solutionism,” the idea that humans are problem-solving beings capable of continuous improvement through knowledge, innovation, and resilient institutions.",
+      "releaseInfo": "ECON 221",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Marian L. Tupy"
+      ]
+    },
+    {
+      "id": "sw_pa_2727",
+      "type": "series",
+      "name": "The History of Financial Crises — Dr. Charles Calomiris",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2727%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2727%2Fhero?tr=w-1920&alt=media",
+      "description": "[FIN 350] In The History of Financial Crises, a ten-hour course, Dr. Charles Calomiris explores the history, causes, and patterns of financial crises from ancient Rome to modern times. The lectures examine how political decisions and institutional structures fundamentally shape financial system stability and crisis vulnerability. Through detailed analysis of historical cases—including the 1929 stock market crash and modern global crises—the course highlights the factors that consistently contribute to financial instability. It concludes by identifying recurring patterns of failure in economic systems and emphasizes the need for reform to build more resilient financial structures.",
+      "releaseInfo": "FIN 350",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Charles Calomiris"
+      ]
+    },
+    {
+      "id": "sw_pa_2723",
+      "type": "series",
+      "name": "The Psychology of Self — Dr. Keith Campbell",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2723%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2723%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 250] In The Psychology of Self, a nine-hour course, Dr. Keith Campbell explores the complex nature of the self through historical, philosophical, and cultural perspectives. The lectures explore topics such as the structure of the self, self-knowledge, self-regulation, self-esteem, the narrative and relational aspects of the self, and the pursuit of growth and transcendence. Throughout the course, Dr. Campbell emphasizes understanding the self as a complex adaptive system—constantly evolving through experiences, relationships, and the pursuit of personal growth—while highlighting both the challenges and opportunities for self-development in contemporary life.",
+      "releaseInfo": "PSYC 250",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Keith Campbell"
+      ]
+    },
+    {
+      "id": "sw_pa_15",
+      "type": "series",
+      "name": "The Philosophy of Ethics — Dr. Stephen R. C. Hicks",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F15%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F15%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 230] In The Philosophy of Ethics, a ten-hour course, Professor Hicks takes us on an engaging journey through the evolution of modern moral philosophy, from the Enlightenment to the 20th century. We dive into the ideas of influential thinkers such as Locke, Kant, Kierkegaard, Mill, Nietzsche, and Foot, exploring their perspectives on topics like rationality, faith, utilitarianism, cultural relativism, and naturalistic ethics. The course offers a thoughtful exploration of the ongoing debate between universal moral principles and contextual or subjective approaches to ethics, while also delving into the powerful roles of reason, emotion, and human nature in shaping our moral values.",
+      "releaseInfo": "PHIL 230",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Stephen R. C. Hicks"
+      ]
+    },
+    {
+      "id": "sw_pa_2731",
+      "type": "series",
+      "name": "The Philosophy of Politics: Part 1 — Dr. Stephen R. C. Hicks",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2731%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2731%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 240] In The Philosophy of Politics Part 1, a nine-hour course, Dr. Stephen Hicks takes us through the development of political philosophy from the late 18th to the early 20th century, focusing on key thinkers and movements that shaped the modern world. We examine the conservative response to the French Revolution, the rise of German idealism and Marxism, the defense of liberalism in Victorian England, and the emergence of pragmatism in America. The course concludes with an analysis of the philosophical foundations of fascism and Nazism and the competing economic theories that arose in response to the Great Depression.",
+      "releaseInfo": "PHIL 240",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Stephen R. C. Hicks"
+      ]
+    },
+    {
+      "id": "sw_pa_39",
+      "type": "series",
+      "name": "Psychology of Social Status — Dr. Rob Henderson",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F39%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F39%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 260] In the Psychology of Social Status, a seven-hour course, Dr. Henderson explores the psychology of social status, examining its evolutionary roots, developmental origins, and the fundamental role it plays in shaping human behavior. The course delves into individual differences in status-seeking, the evolutionary reasons behind status pursuit, and the complex relationships between status, envy, and emotions. It also investigates the dynamics of social status in relation to stories, plot lines, and arenas of competition, and concludes by discussing the concept of luxury beliefs and their impact on society.",
+      "releaseInfo": "PSYC 260",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Rob Henderson"
+      ]
+    },
+    {
+      "id": "sw_pa_20",
+      "type": "series",
+      "name": "Deconstructing Decolonization — Dr. Nigel Biggar",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F20%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F20%2Fhero?tr=w-1920&alt=media",
+      "description": "[POLS 310] In Deconstructing Decolonization, a five-hour course, Dr. Biggar critically examines the concept of decolonization, arguing that the movement is largely misguided and threatens to undermine faith in the liberal West. The course delves into the complex histories of slavery and racism within the British Empire, emphasizing the role of Christian thought and the conviction in human equality in driving abolition and shaping colonial policies. Dr. Biggar rejects the characterization of these policies as \"cultural genocide\" and questions the case for reparations, advocating for a nuanced understanding of historical legacies and a focus on addressing current inequalities.",
+      "releaseInfo": "POLS 310",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Nigel Biggar"
+      ]
+    },
+    {
+      "id": "sw_pa_2711",
+      "type": "series",
+      "name": "Astronomy 101 — Dr. Brian Keating",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2711%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2711%2Fhero?tr=w-1920&alt=media",
+      "description": "[ASTR 101] In Astronomy 101, a seven-hour course, Dr. Brian Keating launches into a fascinating exploration of the history and principles of astronomy—from ancient observations to cutting-edge discoveries. We follow the evolution of astronomical tools and techniques, the cosmic distance ladder, and the properties and life cycles of stars and galaxies. The course delves into the fundamental principles of gravity, the Big Bang theory, and the search for extraterrestrial life, while also highlighting the contributions of groundbreaking scientists and the profound impact of astronomy on our understanding of the universe and our place within it.",
+      "releaseInfo": "ASTR 101",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Brian Keating"
+      ]
+    },
+    {
+      "id": "sw_pa_2725",
+      "type": "series",
+      "name": "The Fundamentals of Mathematics: Trigonometry — Dr. Robert Snellman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2725%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2725%2Fhero?tr=w-1920&alt=media",
+      "description": "[MATH 110] In The Fundamentals of Mathematics: Trigonometry, an eight-hour course, we explore the comprehensive foundations of trigonometry, beginning with basic right triangle concepts and progressing through the unit circle, complex numbers, and inverse functions. We examine the properties and graphs of all six trigonometric functions, while building towards advanced applications in solving non-right triangles through the laws of sines and cosines. The course culminates in practical applications, particularly focusing on Fourier series and their role in signal processing, demonstrating how trigonometry serves as a fundamental tool in modern technology and engineering solutions.",
+      "releaseInfo": "MATH 110",
+      "genres": [
+        "Peterson Academy",
+        "Mathematics",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Robert Snellman"
+      ]
+    },
+    {
+      "id": "sw_pa_10",
+      "type": "series",
+      "name": "The Greatest Leaders in History — Lord Andrew Roberts",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F10%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F10%2Fhero?tr=w-1920&alt=media",
+      "description": "[HIST 320] In The Greatest Leaders in History, an eight-hour course, Lord Andrew Roberts explores the lives and leadership of eight extraordinary figures: Pericles, Julius Caesar, Napoleon Bonaparte, Horatio Nelson, Winston Churchill, George C. Marshall, Dwight D. Eisenhower, and Margaret Thatcher. Through examining their military victories, political reforms, and personal qualities, we gain insights into the nature of effective leadership across different eras and contexts. The course highlights the importance of strategic vision, moral courage, oratorical skills, and the ability to inspire and manage strong personalities while pursuing decisive goals.",
+      "releaseInfo": "HIST 320",
+      "genres": [
+        "Peterson Academy",
+        "History",
+        "Education"
+      ],
+      "cast": [
+        "Lord Andrew Roberts"
+      ]
+    },
+    {
+      "id": "sw_pa_2769",
+      "type": "series",
+      "name": "The Neuroscience of Human Nature — Dr. Baland Jalal",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2769%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2769%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 320] In The Neuroscience of Human Nature, an eight-hour course, Dr. Baland Jalal takes us through a fascinating examination of how the brain constructs the self, social cognition, emotion, aesthetic experience, romantic attraction, and consciousness. Through case studies and research, we delve into the complex interplay between neural structures, behavior, and subjective experience, highlighting the brain's plasticity and the role of unconscious processes. The course ultimately reveals how a deeper understanding of neuroscience can illuminate fundamental aspects of human experience, from creativity and aesthetics to free will and the nature of consciousness itself.",
+      "releaseInfo": "NEUR 320",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Baland Jalal"
+      ]
+    },
+    {
+      "id": "sw_pa_32",
+      "type": "series",
+      "name": "Introduction to Political Science — Dr. Eric Kaufmann",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F32%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F32%2Fhero?tr=w-1920&alt=media",
+      "description": "[POLS 101] In Introduction to Political Science, an eight-hour course, we explore the fundamentals of political science, delving into comparative political institutions, electoral systems, voting behavior, and the causes of war. We examine the design of democracy in ethnically divided societies and trace the historical evolution of the modern nation-state. The course concludes by discussing the impact of globalization on the nation-state as the primary unit of human political organization.",
+      "releaseInfo": "POLS 101",
+      "genres": [
+        "Peterson Academy",
+        "Social Sciences",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Eric Kaufmann"
+      ]
+    },
+    {
+      "id": "sw_pa_3249",
+      "type": "series",
+      "name": "The Historical Reliability of the Bible — Wesley Huff",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3249%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3249%2Fhero?tr=w-1920&alt=media",
+      "description": "[REL 102] In The Historical Reliability of the Bible, an eight-hour course, Wesley Huff guides us through the historical foundations of Scripture. Together, we examine the evidence for the Bible's reliability from the formation of the biblical canon to the textual history of the Old and New Testaments, as well as the archaeological discoveries that illuminate the biblical world. Along the way, Huff explains how the early church recognized the New Testament canon, traces the history of English Bible translation, and concludes by evaluating historical Jesus studies, showing how the cumulative historical evidence supports the Gospels as reliable eyewitness accounts of Jesus.",
+      "releaseInfo": "REL 102",
+      "genres": [
+        "Peterson Academy",
+        "Religion",
+        "Education"
+      ],
+      "cast": [
+        "Wesley Huff"
+      ]
+    },
+    {
+      "id": "sw_pa_34",
+      "type": "series",
+      "name": "How to Plan Your Life — Dr. Jordan B. Peterson",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F34%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F34%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 100] In How to Plan Your Life, a six-hour course, Dr. Jordan Peterson explores the principles of personal development, meaningful living, and psychological transformation. He examines the interplay between order and chaos, the role of boundaries and vision-setting, and how instincts and motivations shape identity. Through psychological insights, Biblical narratives, and practical strategies, the course emphasizes personal responsibility, the pursuit of meaning, and the power of individual choices. Dr. Peterson concludes by highlighting how self-reflection, courageous action, and truthful living drive transformation and shape both personal and societal growth.",
+      "releaseInfo": "PSYC 100",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Jordan B. Peterson"
+      ]
+    },
+    {
+      "id": "sw_pa_3228",
+      "type": "series",
+      "name": "Business Leadership Ethics — Dr. Stephen R. C. Hicks",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3228%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3228%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 270] In Business Leadership Ethics, a nine-hour course, Professor Hicks explores the philosophical foundations of entrepreneurship and business leadership, examining how moral frameworks—egoism, altruism, and predation—shape leadership styles, resource management, and economic systems. We also analyze key entrepreneurial virtues such as rationality, courage, integrity, and productivity. Tracing the dramatic rise in global prosperity over the past two centuries, the course emphasizes how innovation, critical thinking, and strong character equip leaders to navigate complex ethical, economic, and political challenges in a rapidly changing world.",
+      "releaseInfo": "PHIL 270",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Stephen R. C. Hicks"
+      ]
+    },
+    {
+      "id": "sw_pa_3241",
+      "type": "series",
+      "name": "Thomas Aquinas — Bishop Robert Barron",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3241%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3241%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 330] In Thomas Aquinas, a seven-hour course, Bishop Robert Barron guides us through a study of the theological and philosophical system of Thomas Aquinas, the 13th-century Dominican friar who masterfully synthesized Ancient Greek philosophy with Christian doctrine. We examine his Five Ways for demonstrating God's existence, his understanding of divine attributes and the Trinity, and his teachings on creation, providence, and the problem of evil. The course delves into Aquinas's philosophical anthropology, particularly the relationship between body and soul and humanity's creation in God's image. We conclude by studying his ethical framework centered on finding happiness in God as humanity's ultimate goal, and the role of virtues in ordering human life toward God.",
+      "releaseInfo": "PHIL 330",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Bishop Robert Barron"
+      ]
+    },
+    {
+      "id": "sw_pa_3239",
+      "type": "series",
+      "name": "The Philosophy of Science — Dr. James Orr",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3239%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3239%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 404] In The Philosophy of Science, an eight-hour course, Dr. James Orr traces the development of science from ancient Greece through the Scientific Revolution to today. He examines how theological, institutional, and philosophical forces shaped science, while tackling key issues like the demarcation problem of science versus pseudoscience, Hume’s problem of induction, Kuhn’s theory of paradigm shifts, and the realism debate. The course also engages fascinating unresolved questions raised by cosmology, neuroscience, and quantum mechanics, ultimately arguing that scientific progress does not eliminate philosophical inquiry but rather deepens it, revealing new mysteries that demand philosophical analysis.",
+      "releaseInfo": "PHIL 404",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. James Orr"
+      ]
+    },
+    {
+      "id": "sw_pa_3223",
+      "type": "series",
+      "name": "Evolution, Sex & The Birth Control Pill — Dr. Sarah Hill",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3223%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3223%2Fhero?tr=w-1920&alt=media",
+      "description": "[BIO 330] In Evolution, Sex & The Birth Control Pill, an eight-hour course, Dr. Sarah Hill takes students on a deep dive into how evolutionary psychology and reproductive biology shape sex differences in human behavior, mate preferences, and hormone regulation. She explores the complex effects of hormonal birth control on women's bodies, minds, and partner choices, highlighting both its benefits and potential risks, including heightened rates of depression. The course concludes by examining the wider societal impact of birth control and underscores the critical importance of sex-aware research in medicine and beyond.",
+      "releaseInfo": "BIO 330",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Sarah Hill"
+      ]
+    },
+    {
+      "id": "sw_pa_14",
+      "type": "series",
+      "name": "Why We Get Sick — Dr. Benjamin Bikman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F14%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F14%2Fhero?tr=w-1920&alt=media",
+      "description": "[BIO 250] In Why We Get Sick, a seven-hour course, Dr. Benjamin Bikman examines the metabolic origins of chronic disease, focusing on the complex relationship between metabolic health, insulin resistance, and chronic conditions like type 2 diabetes, heart disease, Alzheimer's, fertility issues, and cancer. The lectures cover the causes and consequences of insulin resistance and challenge conventional views about disease origins. The course concludes with evidence-based solutions, highlighting the effectiveness of dietary changes, lifestyle interventions, and personalized strategies for reversing insulin resistance and improving overall metabolic health.",
+      "releaseInfo": "BIO 250",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Benjamin Bikman"
+      ]
+    },
+    {
+      "id": "sw_pa_2767",
+      "type": "series",
+      "name": "Introductory Applied Mathematics — Dr. Robert Snellman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2767%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2767%2Fhero?tr=w-1920&alt=media",
+      "description": "[MATH 210] In Introductory Applied Mathematics, an eight-hour course, Dr. Snellman teaches concepts in calculus and optimization, with a strong focus on practical applications in data science, machine learning, and real-world problem-solving. We progress from basic derivatives and limits to advanced optimization techniques, including Newton's method, the bisection method, and gradient descent. Dr. Snellman also demonstrates practical implementations of this mathematics in Python. The course also highlights how mastering these concepts provides a competitive edge in fields like business, medicine, and AI, while also reflecting on the ethical implications of their use.",
+      "releaseInfo": "MATH 210",
+      "genres": [
+        "Peterson Academy",
+        "Mathematics",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Robert Snellman"
+      ]
+    },
+    {
+      "id": "sw_pa_35",
+      "type": "series",
+      "name": "The Boy Crisis — Dr. Warren Farrell",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F35%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F35%2Fhero?tr=w-1920&alt=media",
+      "description": "[PSYC 340] In The Boy Crisis, a six-hour course, Dr. Warren Farrell explores the Boy Crisis, a phenomenon in developed nations where boys face challenges in various aspects of life. He presents evidence of this crisis and identifies five main causes: the absence of father involvement, misguided beliefs about male power and privilege, a lack of purpose, fear of psychological attachment, and a repulsion for male vulnerability. Dr. Farrell discusses the impact of these factors on boys' development, education, and future prospects, emphasizing the need for a more balanced approach to parenting and gender issues.",
+      "releaseInfo": "PSYC 340",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Warren Farrell"
+      ]
+    },
+    {
+      "id": "sw_pa_25",
+      "type": "series",
+      "name": "The Shakespearean Tragedies — Dr. Andrew Doyle",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F25%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F25%2Fhero?tr=w-1920&alt=media",
+      "description": "[ENGL 310] In The Shakespearean Tragedies, an eight-hour course, Dr. Andrew Doyle guides us through the genius of William Shakespeare, exploring the historical context that shaped his works and his unmatched talent for creating complex, timeless characters. We examine the themes, subversions, and intricacies of plays like Hamlet, King Lear, Macbeth, Romeo and Juliet, Antony and Cleopatra, and Julius Caesar. The course emphasizes Shakespeare's mastery of language, deep insight into the human heart, and his ability to challenge audiences, cementing his lasting influence on literature and culture.",
+      "releaseInfo": "ENGL 310",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Andrew Doyle"
+      ]
+    },
+    {
+      "id": "sw_pa_17",
+      "type": "series",
+      "name": "Brain Metabolism and Mental Health — Dr. Chris Palmer",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F17%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F17%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 340] In Brain Metabolism and Mental Health, a nine-hour course, Dr. Chris Palmer explores the brain energy theory, which suggests that mental disorders are fundamentally metabolic disorders of the brain. The lectures examine the critical role of mitochondria in mental health, highlighting their influence on neurotransmitters, inflammation, and overall brain function. The lectures also explore the complex relationship between mental illness and metabolic conditions, addressing the impact of lifestyle factors, trauma, and substance use. Key interventions discussed include the ketogenic diet and the six pillars of lifestyle medicine. The course concludes with practical strategies for improving both metabolic and mental health through a sustainable, whole-person approach focused on long-term recovery.",
+      "releaseInfo": "NEUR 340",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Chris Palmer"
+      ]
+    },
+    {
+      "id": "sw_pa_23",
+      "type": "series",
+      "name": "Intelligence, Rationality, Wisdom and Spirituality — Dr. John Vervaeke",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F23%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F23%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 305] In Intelligence, Rationality, Wisdom, and Spirituality, an eight-hour course, Dr. Vervaeke explores the core components of cognitive agency, including intelligence, rationality, wisdom, and spirituality. We delve into the challenges of adaptive intelligence, the deep continuity between mind and life, and the role of meaning, love, and mattering in human cognition. The course examines the complex nature of rationality, its relationship to intelligence and the environment, and introduces the concept of proleptic rationality and the importance of imaginal practices for personal growth. Finally, we discover the profound connections between ritual, rationality, wisdom, and spirituality, emphasizing the transformative power of serious play and imaginal engagement in fostering perspectival and participatory knowing.",
+      "releaseInfo": "PHIL 305",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. John Vervaeke"
+      ]
+    },
+    {
+      "id": "sw_pa_3216",
+      "type": "series",
+      "name": "Introduction to Music Theory — Samuel Andreyev",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3216%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F3216%2Fhero?tr=w-1920&alt=media",
+      "description": "[MUS 101] In Introduction to Music Theory, an eight-hour course, Samuel Andreyev takes us through the foundations of Western music theory, from the five-line staff system and rhythmic notation to pitch, intervals, scales, and harmony. We examine how music creates movement through consonance and dissonance, cadences, voice leading, and formal structures, while developing practical skills like ear training and score analysis. The course emphasizes that music theory serves as a descriptive language rather than prescriptive rules, enabling musicians to communicate across time and cultures while acknowledging that notation remains an abstraction of embodied musical experience.",
+      "releaseInfo": "MUS 101",
+      "genres": [
+        "Peterson Academy",
+        "Humanities",
+        "Education"
+      ],
+      "cast": [
+        "Samuel Andreyev"
+      ]
+    },
+    {
+      "id": "sw_pa_2715",
+      "type": "series",
+      "name": "The Fundamentals of Physiology — Dr. Benjamin Bikman",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2715%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2715%2Fhero?tr=w-1920&alt=media",
+      "description": "[BIO 110] In The Fundamentals of Physiology, a seven-hour course, Dr. Benjamin Bikman provides a comprehensive exploration of human physiology, beginning with cellular fundamentals and progressing through major body systems. We examine the complex mechanisms that maintain homeostasis, delve into the intricate relationships between various organ systems, and discuss clinically relevant topics and modern applications. The course offers a thorough understanding of how the human body functions and the crucial role of each system in maintaining overall health.",
+      "releaseInfo": "BIO 110",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Benjamin Bikman"
+      ]
+    },
+    {
+      "id": "sw_pa_37",
+      "type": "series",
+      "name": "Intro to Neuroscience — Dr. Baland Jalal",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F37%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F37%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 101] In Intro to Neuroscience, an eight-hour course, Dr. Jalal embarks on a captivating journey through the intricacies of the human brain, exploring its structure, function, and the fascinating phenomena it produces. We delve into topics such as the neuroscience of body image, neuroplasticity, memory, sleep, and the fascinating realm of dreams. Throughout the course, we highlight the complex interplay between the mind, brain, and body. This exploration also covers the potential clinical applications of neuroscience findings, culminating in empowering insights on how to lead a fulfilling and purposeful life.",
+      "releaseInfo": "NEUR 101",
+      "genres": [
+        "Peterson Academy",
+        "Science",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Baland Jalal"
+      ]
+    },
+    {
+      "id": "sw_pa_2735",
+      "type": "series",
+      "name": "The Neuroscience of Dreams — Dr. Baland Jalal",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2735%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2735%2Fhero?tr=w-1920&alt=media",
+      "description": "[NEUR 310] In The Neuroscience of Dreams, a seven-hour course, we embark on a fascinating exploration of sleep and dreams, delving into the neurological processes, evolutionary theories, and practical implications of these essential human experiences. Dr. Baland Jalal guides us through the stages of sleep, the neuroscience of dreaming, and various sleep disorders, while also examining the creative potential and cultural interpretations of dreams. The course highlights the importance of understanding sleep for both personal well-being and scientific inquiry, concluding with practical strategies for improving sleep quality and harnessing the power of dreams in our waking lives.",
+      "releaseInfo": "NEUR 310",
+      "genres": [
+        "Peterson Academy",
+        "Psychology",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Baland Jalal"
+      ]
+    }
+  ]
+}

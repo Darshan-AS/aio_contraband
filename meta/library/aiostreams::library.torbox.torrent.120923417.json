@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "aiostreams::library.torbox.torrent.120923417",
+    "type": "library",
+    "name": "Astronomy 101 — Dr. Brian Keating",
+    "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2711%2Fthumb?tr=h-1200&alt=media",
+    "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2711%2Fhero?tr=w-1920&alt=media",
+    "description": "[ASTR 101] In Astronomy 101, a seven-hour course, Dr. Brian Keating launches into a fascinating exploration of the history and principles of astronomy—from ancient observations to cutting-edge discoveries. We follow the evolution of astronomical tools and techniques, the cosmic distance ladder, and the properties and life cycles of stars and galaxies. The course delves into the fundamental principles of gravity, the Big Bang theory, and the search for extraterrestrial life, while also highlighting the contributions of groundbreaking scientists and the profound impact of astronomy on our understanding of the universe and our place within it.",
+    "releaseInfo": "ASTR 101",
+    "genres": [
+      "Peterson Academy",
+      "Science",
+      "Education"
+    ],
+    "cast": [
+      "Dr. Brian Keating"
+    ],
+    "videos": [
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:2",
+        "title": "1. Looking Upward",
+        "season": 1,
+        "episode": 1,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 61 min · Dr. Brian Keating\n\nIn our introductory lecture, Dr. Brian Keating presents astronomy as humanity's oldest science, tracing its evolution from ancient naked-eye observations to modern scientific inquiry. He explores how early astronomers like Aristotle, Copernicus, and Galileo developed increasingly accurate models of the cosmos, while highlighting how even brilliant scientists made significant errors alongside their groundbreaking discoveries. The lecture emphasizes astronomy's unique accessibility as a science that anyone can practice with their own eyes, while also discussing its profound impact on human civilization through developments in timekeeping, navigation, and our understanding of our place in the universe.",
+        "description": "⏱️ 61 min · Dr. Brian Keating\n\nIn our introductory lecture, Dr. Brian Keating presents astronomy as humanity's oldest science, tracing its evolution from ancient naked-eye observations to modern scientific inquiry. He explores how early astronomers like Aristotle, Copernicus, and Galileo developed increasingly accurate models of the cosmos, while highlighting how even brilliant scientists made significant errors alongside their groundbreaking discoveries. The lecture emphasizes astronomy's unique accessibility as a science that anyone can practice with their own eyes, while also discussing its profound impact on human civilization through developments in timekeeping, navigation, and our understanding of our place in the universe."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:8",
+        "title": "2. The Astronomer’s Toolkit",
+        "season": 1,
+        "episode": 2,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 53 min · Dr. Brian Keating\n\nIn lecture two, we trace the evolution of astronomical observation tools—from the human eye to modern telescopes and detectors—and explore how technological advances have deepened our understanding of the universe. We examine the principles and development of refracting and reflecting telescopes, highlighting their strengths and limitations, and discuss the transformative role of spectroscopy in revealing the composition and motion of celestial bodies. The lecture also touches on the progression of astronomical imaging, from early hand-drawn sketches to today’s digital photography, showing how each breakthrough has expanded our ability to study the cosmos.",
+        "description": "⏱️ 53 min · Dr. Brian Keating\n\nIn lecture two, we trace the evolution of astronomical observation tools—from the human eye to modern telescopes and detectors—and explore how technological advances have deepened our understanding of the universe. We examine the principles and development of refracting and reflecting telescopes, highlighting their strengths and limitations, and discuss the transformative role of spectroscopy in revealing the composition and motion of celestial bodies. The lecture also touches on the progression of astronomical imaging, from early hand-drawn sketches to today’s digital photography, showing how each breakthrough has expanded our ability to study the cosmos."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:7",
+        "title": "3. Measurements and Mysteries",
+        "season": 1,
+        "episode": 3,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 60 min · Dr. Brian Keating\n\nIn lecture three, we learn about the cosmic distance ladder, a series of methods astronomers use to measure distances in the universe. Starting with measurements on Earth, we progress to the moon, sun, and planets using techniques like parallax and the inverse square law of light intensity. The lecture discusses the properties of our solar system, including the sun, planets, and minor bodies like asteroids and dwarf planets. We also delve into the exciting field of exoplanets, discussing how they are detected using the Doppler shift and transit methods, and the potential for these techniques to reveal signs of life and even technology on distant worlds.",
+        "description": "⏱️ 60 min · Dr. Brian Keating\n\nIn lecture three, we learn about the cosmic distance ladder, a series of methods astronomers use to measure distances in the universe. Starting with measurements on Earth, we progress to the moon, sun, and planets using techniques like parallax and the inverse square law of light intensity. The lecture discusses the properties of our solar system, including the sun, planets, and minor bodies like asteroids and dwarf planets. We also delve into the exciting field of exoplanets, discussing how they are detected using the Doppler shift and transit methods, and the potential for these techniques to reveal signs of life and even technology on distant worlds."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:5",
+        "title": "4. The Life of Stars",
+        "season": 1,
+        "episode": 4,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 53 min · Dr. Brian Keating\n\nIn lecture four, we delve into the properties and life cycle of stars, focusing on our sun as the primary example. We explore the process of nuclear fusion that powers the sun, the composition of the solar system, and the methods used to determine the age of the Earth and the sun. The lecture also covers the evolution of stars, from their formation to their eventual fate. We discuss the motion of stars and planets, governed by Newton's laws of gravity, and introduce the concept of the Milky Way galaxy and its structure, setting the stage for the next lecture on galaxies and the universe as a whole.",
+        "description": "⏱️ 53 min · Dr. Brian Keating\n\nIn lecture four, we delve into the properties and life cycle of stars, focusing on our sun as the primary example. We explore the process of nuclear fusion that powers the sun, the composition of the solar system, and the methods used to determine the age of the Earth and the sun. The lecture also covers the evolution of stars, from their formation to their eventual fate. We discuss the motion of stars and planets, governed by Newton's laws of gravity, and introduce the concept of the Milky Way galaxy and its structure, setting the stage for the next lecture on galaxies and the universe as a whole."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:1",
+        "title": "5. Galaxies and Gravity",
+        "season": 1,
+        "episode": 5,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 32 min · Dr. Brian Keating\n\nIn lecture five, we study the fundamental principles of gravity, orbital dynamics, and their application to understanding the structure and composition of the Milky Way galaxy. Dr. Keating covers Newton's laws of motion and universal gravitation, explaining how these principles help measure celestial masses and distances. The discussion also highlights the role of globular clusters in revealing the presence of dark matter and challenging our understanding of the universe's composition.",
+        "description": "⏱️ 32 min · Dr. Brian Keating\n\nIn lecture five, we study the fundamental principles of gravity, orbital dynamics, and their application to understanding the structure and composition of the Milky Way galaxy. Dr. Keating covers Newton's laws of motion and universal gravitation, explaining how these principles help measure celestial masses and distances. The discussion also highlights the role of globular clusters in revealing the presence of dark matter and challenging our understanding of the universe's composition."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:3",
+        "title": "6. Distance and Dark Matter",
+        "season": 1,
+        "episode": 6,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 49 min · Dr. Brian Keating\n\nIn lecture six, we investigate the crucial role of globular clusters and Cepheid variable stars in measuring cosmic distances, with particular focus on Henrietta Swan Leavitt's groundbreaking period-luminosity relationship. The discussion delves into Edwin Hubble's use of Cepheid variables to prove the existence of galaxies beyond the Milky Way, and examines the evidence for dark matter through galactic rotation curves and gravitational effects. Dr. Keating discusses various theories about the nature of dark matter and methods for its detection, noting the importance of gravitational lensing in studying galaxy clusters.",
+        "description": "⏱️ 49 min · Dr. Brian Keating\n\nIn lecture six, we investigate the crucial role of globular clusters and Cepheid variable stars in measuring cosmic distances, with particular focus on Henrietta Swan Leavitt's groundbreaking period-luminosity relationship. The discussion delves into Edwin Hubble's use of Cepheid variables to prove the existence of galaxies beyond the Milky Way, and examines the evidence for dark matter through galactic rotation curves and gravitational effects. Dr. Keating discusses various theories about the nature of dark matter and methods for its detection, noting the importance of gravitational lensing in studying galaxy clusters."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:6",
+        "title": "7. Beginning to End",
+        "season": 1,
+        "episode": 7,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 53 min · Dr. Brian Keating\n\nIn lecture seven, we explore the Big Bang theory, the expansion of the universe, and its implications for the past and future of the cosmos. We examine Olbers' Paradox which questions why the night sky is dark in a supposedly infinite universe. The lecture looks at Hubble's law, the relationship between a galaxy's distance and its redshift, and how this law allows astronomers to measure cosmic distances and the age of the universe. Finally, we discuss the ultimate fate of the universe, from the formation of the first galaxies to the eventual dissipation of black holes through Hawking radiation, and the possibility of the universe respawning into another universe.",
+        "description": "⏱️ 53 min · Dr. Brian Keating\n\nIn lecture seven, we explore the Big Bang theory, the expansion of the universe, and its implications for the past and future of the cosmos. We examine Olbers' Paradox which questions why the night sky is dark in a supposedly infinite universe. The lecture looks at Hubble's law, the relationship between a galaxy's distance and its redshift, and how this law allows astronomers to measure cosmic distances and the age of the universe. Finally, we discuss the ultimate fate of the universe, from the formation of the first galaxies to the eventual dissipation of black holes through Hawking radiation, and the possibility of the universe respawning into another universe."
+      },
+      {
+        "id": "aiostreams::library.torbox.torrent.120923417:4",
+        "title": "8. Beyond Earth",
+        "season": 1,
+        "episode": 8,
+        "thumbnail": "https://image.mux.com/L8R1p01w2nt00GiYDUsIQ2NkE8RFiO2ikoM9WcHG3U9ac/thumbnail.jpg?width=640",
+        "overview": "⏱️ 79 min · Dr. Brian Keating\n\nIn our eighth and final lecture, we turn to comets, meteors, and the search for extraterrestrial life. We examine how these celestial bodies may have contributed to Earth's water and the origin of life, and study meteorites as time capsules of the early solar system. The lecture also delves into the possibility of alien civilizations, the Fermi Paradox, and efforts to detect intelligent life. Dr. Keating concludes our course by exploring the tension between scientific and poetic approaches to understanding the cosmos, and how science can deepen our appreciation of its beauty.",
+        "description": "⏱️ 79 min · Dr. Brian Keating\n\nIn our eighth and final lecture, we turn to comets, meteors, and the search for extraterrestrial life. We examine how these celestial bodies may have contributed to Earth's water and the origin of life, and study meteorites as time capsules of the early solar system. The lecture also delves into the possibility of alien civilizations, the Fermi Paradox, and efforts to detect intelligent life. Dr. Keating concludes our course by exploring the tension between scientific and poetic approaches to understanding the cosmos, and how science can deepen our appreciation of its beauty."
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "metas": [
+    {
+      "id": "sw_pa_15",
+      "type": "series",
+      "name": "The Philosophy of Ethics — Dr. Stephen R. C. Hicks",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F15%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F15%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 230] In The Philosophy of Ethics, a ten-hour course, Professor Hicks takes us on an engaging journey through the evolution of modern moral philosophy, from the Enlightenment to the 20th century. We dive into the ideas of influential thinkers such as Locke, Kant, Kierkegaard, Mill, Nietzsche, and Foot, exploring their perspectives on topics like rationality, faith, utilitarianism, cultural relativism, and naturalistic ethics. The course offers a thoughtful exploration of the ongoing debate between universal moral principles and contextual or subjective approaches to ethics, while also delving into the powerful roles of reason, emotion, and human nature in shaping our moral values.",
+      "releaseInfo": "PHIL 230",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Stephen R. C. Hicks"
+      ]
+    },
+    {
+      "id": "sw_pa_2731",
+      "type": "series",
+      "name": "The Philosophy of Politics: Part 1 — Dr. Stephen R. C. Hicks",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2731%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F2731%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 240] In The Philosophy of Politics Part 1, a nine-hour course, Dr. Stephen Hicks takes us through the development of political philosophy from the late 18th to the early 20th century, focusing on key thinkers and movements that shaped the modern world. We examine the conservative response to the French Revolution, the rise of German idealism and Marxism, the defense of liberalism in Victorian England, and the emergence of pragmatism in America. The course concludes with an analysis of the philosophical foundations of fascism and Nazism and the competing economic theories that arose in response to the Great Depression.",
+      "releaseInfo": "PHIL 240",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Stephen R. C. Hicks"
+      ]
+    },
+    {
+      "id": "sw_pa_20",
+      "type": "series",
+      "name": "Deconstructing Decolonization — Dr. Nigel Biggar",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F20%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F20%2Fhero?tr=w-1920&alt=media",
+      "description": "[POLS 310] In Deconstructing Decolonization, a five-hour course, Dr. Biggar critically examines the concept of decolonization, arguing that the movement is largely misguided and threatens to undermine faith in the liberal West. The course delves into the complex histories of slavery and racism within the British Empire, emphasizing the role of Christian thought and the conviction in human equality in driving abolition and shaping colonial policies. Dr. Biggar rejects the characterization of these policies as \"cultural genocide\" and questions the case for reparations, advocating for a nuanced understanding of historical legacies and a focus on addressing current inequalities.",
+      "releaseInfo": "POLS 310",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. Nigel Biggar"
+      ]
+    },
+    {
+      "id": "sw_pa_23",
+      "type": "series",
+      "name": "Intelligence, Rationality, Wisdom and Spirituality — Dr. John Vervaeke",
+      "poster": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F23%2Fthumb?tr=h-1200&alt=media",
+      "background": "https://ik.imagekit.io/0qkyxdfkk/prod/courses%2F23%2Fhero?tr=w-1920&alt=media",
+      "description": "[PHIL 305] In Intelligence, Rationality, Wisdom, and Spirituality, an eight-hour course, Dr. Vervaeke explores the core components of cognitive agency, including intelligence, rationality, wisdom, and spirituality. We delve into the challenges of adaptive intelligence, the deep continuity between mind and life, and the role of meaning, love, and mattering in human cognition. The course examines the complex nature of rationality, its relationship to intelligence and the environment, and introduces the concept of proleptic rationality and the importance of imaginal practices for personal growth. Finally, we discover the profound connections between ritual, rationality, wisdom, and spirituality, emphasizing the transformative power of serious play and imaginal engagement in fostering perspectival and participatory knowing.",
+      "releaseInfo": "PHIL 305",
+      "genres": [
+        "Peterson Academy",
+        "Philosophy",
+        "Education"
+      ],
+      "cast": [
+        "Dr. John Vervaeke"
+      ]
+    }
+  ]
+}
