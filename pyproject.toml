@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aio-contraband"
+version = "2.0.0"
+description = "Pure functional static Stremio addon compiler & TorBox cloud ingestor for Contraband."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Darshan AS" }]
+dependencies = [
+    "httpx>=0.28.1",
+    "rich>=13.9.4",
+    "typer>=0.15.2",
+]
+
+[project.scripts]
+cb = "contraband.cli:main"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.127.0",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "ruff>=0.9.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/contraband"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+mypy_path = "src"
+packages = ["contraband", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
