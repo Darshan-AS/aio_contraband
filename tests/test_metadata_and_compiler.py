@@ -3,6 +3,7 @@
 import json
 from pathlib import Path, PurePosixPath
 
+from contraband.cli import commit_catalog_index, load_catalog_index, resolve_bound_media_item
 from contraband.core.compiler import (
     compile_contraband_addon,
     seed_index_from_existing_files,
@@ -183,3 +184,37 @@ def test_resolve_within_directory_blocks_traversal(tmp_path: Path) -> None:
 
     bad_res = resolve_within_directory(tmp_path, "../../etc/passwd")
     assert isinstance(bad_res, Err)
+
+
+def test_single_pass_batch_index_weaving_and_commit(tmp_path: Path) -> None:
+    idx = load_catalog_index(tmp_path)
+    assert idx.items == ()
+
+    bound1 = resolve_bound_media_item(
+        display_title="MasterClass - Chris Voss - Art of Negotiation",
+        info_hash="1" * 40,
+        torrent_id=101,
+        files=(TorrentFileEntry(index=0, name="01. Intro.mp4", size_bytes=100),),
+        fetch_html=lambda _url: None,
+        allow_fallback=True,
+    )
+    bound2 = resolve_bound_media_item(
+        display_title="Standup Special 2026",
+        info_hash="2" * 40,
+        torrent_id=102,
+        files=(TorrentFileEntry(index=0, name="Special.2026.1080p.mp4", size_bytes=200),),
+        fetch_html=lambda _url: None,
+        collection_override="Stand-Up Specials",
+        media_type_override="movie",
+    )
+    assert bound1 is not None
+    assert bound2 is not None
+
+    idx = upsert_media_item(idx, bound1)
+    idx = upsert_media_item(idx, bound2)
+    commit_res = commit_catalog_index(tmp_path, idx)
+    assert isinstance(commit_res, Ok)
+    assert commit_res.value > 0
+
+    reloaded = load_catalog_index(tmp_path)
+    assert len(reloaded.items) == 2

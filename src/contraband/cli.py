@@ -22,13 +22,14 @@ from contraband.core.compiler import (
     seed_index_from_existing_files,
     upsert_media_item,
 )
-from contraband.core.errors import StreamWeaverError
+from contraband.core.errors import ContrabandError
 from contraband.core.matcher import format_bytes, match_files_to_episodes
 from contraband.core.result import Err, Ok, Result
 from contraband.core.types import (
     DEFAULT_CONTRABAND_LOGO,
     AddonConfig,
     BoundMediaItem,
+    CatalogIndex,
     DebridQueuedItem,
     DebridTorrentItem,
     EpisodeFileMatch,
@@ -107,6 +108,68 @@ def _require_torbox_provider(
     return TorBoxProvider(api_key=api_key, http_client=http_client, max_active=max_active)
 
 
+def resolve_bound_media_item(
+    *,
+    display_title: str,
+    info_hash: str,
+    torrent_id: int,
+    files: Sequence[TorrentFileEntry],
+    fetch_html: HtmlFetcher,
+    parsers: Sequence[MetadataProviderProtocol] = DEFAULT_METADATA_PROVIDERS,
+    explicit_url: str | None = None,
+    explicit_slug: str | None = None,
+    collection_override: str | None = None,
+    media_type_override: MediaType | None = None,
+    allow_fallback: bool = False,
+) -> BoundMediaItem | None:
+    """Purely resolves metadata, applies overrides, and binds episode file indices."""
+    effective_fallback = bool(allow_fallback or collection_override or media_type_override)
+    meta = resolve_media_metadata(
+        display_title=display_title,
+        files=files,
+        fetch_html=fetch_html,
+        parsers=parsers,
+        torrent_id=torrent_id,
+        explicit_url=explicit_url,
+        explicit_slug=explicit_slug,
+        allow_fallback=effective_fallback,
+    )
+    if meta is None:
+        return None
+
+    if collection_override:
+        meta = meta.with_collection(collection_override)
+    if media_type_override:
+        meta = meta.with_media_type(media_type_override)
+
+    ep_matches = match_files_to_episodes(files, meta.episodes)
+    return BoundMediaItem(
+        metadata=meta,
+        info_hash=info_hash.lower(),
+        torrent_id=torrent_id,
+        episode_matches=ep_matches,
+    )
+
+
+def load_catalog_index(addon_dir: Path, *, clean: bool = False) -> CatalogIndex:
+    """Loads the existing `CatalogIndex` from `addon_dir` (or returns an empty index if `clean`)."""
+    existing_vfs = read_addon_virtual_fs(addon_dir) if not clean else VirtualFS()
+    return seed_index_from_existing_files(existing_vfs.files)
+
+
+def commit_catalog_index(
+    addon_dir: Path,
+    index: CatalogIndex,
+    *,
+    addon_config: AddonConfig = DEFAULT_ADDON_CONFIG,
+    clean: bool = False,
+) -> Result[int]:
+    """Compiles `index` into a `VirtualFS` and materializes it to `addon_dir` in a single pass."""
+    compiled_vfs = compile_contraband_addon(index, addon_config=addon_config)
+    clean_subdirs = ("catalog", "meta", "stream") if clean else ()
+    return materialize_virtual_fs(addon_dir, compiled_vfs, clean_subdirs=clean_subdirs)
+
+
 def weave_media_into_addon(
     *,
     display_title: str,
@@ -125,57 +188,44 @@ def weave_media_into_addon(
     addon_config: AddonConfig = DEFAULT_ADDON_CONFIG,
 ) -> Result[WeaveMediaOutcome | None]:
     """Resolves metadata, matches episodes/files, updates `CatalogIndex`, and materializes `VirtualFS`."""
-    effective_fallback = bool(allow_fallback or collection_override or media_type_override)
-    meta = resolve_media_metadata(
+    bound = resolve_bound_media_item(
         display_title=display_title,
+        info_hash=info_hash,
+        torrent_id=torrent_id,
         files=files,
         fetch_html=fetch_html,
         parsers=parsers,
-        torrent_id=torrent_id,
         explicit_url=explicit_url,
         explicit_slug=explicit_slug,
-        allow_fallback=effective_fallback,
+        collection_override=collection_override,
+        media_type_override=media_type_override,
+        allow_fallback=allow_fallback,
     )
-    if meta is None:
+    if bound is None:
         return Ok(None)
 
-    if collection_override:
-        meta = meta.with_collection(collection_override)
-    if media_type_override:
-        meta = meta.with_media_type(media_type_override)
-
-    ep_matches = match_files_to_episodes(files, meta.episodes)
-    bound = BoundMediaItem(
-        metadata=meta,
-        info_hash=info_hash.lower(),
-        torrent_id=torrent_id,
-        episode_matches=ep_matches,
-    )
-
-    existing_vfs = read_addon_virtual_fs(addon_dir) if not clean_before_build else VirtualFS()
-    current_index = seed_index_from_existing_files(existing_vfs.files)
+    current_index = load_catalog_index(addon_dir, clean=clean_before_build)
     next_index = upsert_media_item(current_index, bound)
-    compiled_vfs = compile_contraband_addon(next_index, addon_config=addon_config)
-
-    clean_subdirs = ("catalog", "meta", "stream") if clean_before_build else ()
-    match materialize_virtual_fs(addon_dir, compiled_vfs, clean_subdirs=clean_subdirs):
+    match commit_catalog_index(
+        addon_dir, next_index, addon_config=addon_config, clean=clean_before_build
+    ):
         case Err() as err:
             return err
         case Ok(written_count):
             return Ok(
                 WeaveMediaOutcome(
-                    metadata=meta,
-                    episode_matches=ep_matches,
+                    metadata=bound.metadata,
+                    episode_matches=bound.episode_matches,
                     files_written=written_count,
                 )
             )
 
 
-def _print_weave_outcome(outcome: WeaveMediaOutcome, addon_dir: Path) -> None:
-    meta = outcome.metadata
+def _print_weave_outcome(bound: BoundMediaItem, addon_dir: Path) -> None:
+    meta = bound.metadata
     status_note = (
-        f"{len(outcome.episode_matches)}/{len(meta.episodes) or len(outcome.episode_matches)} files linked"
-        if outcome.episode_matches
+        f"{len(bound.episode_matches)}/{len(meta.episodes) or len(bound.episode_matches)} files linked"
+        if bound.episode_matches
         else "queued (run `cb sync` once download finishes)"
     )
     console.print(
@@ -186,40 +236,38 @@ def _print_weave_outcome(outcome: WeaveMediaOutcome, addon_dir: Path) -> None:
     )
 
 
-def _weave_and_log(
+def _weave_into_index_and_log(
     *,
+    index: CatalogIndex,
     display_title: str,
     info_hash: str,
     torrent_id: int,
     files: Sequence[TorrentFileEntry],
     addon_dir: Path,
     http_client: HttpxClient,
-    addon_config: AddonConfig,
     url: str | None = None,
     slug: str | None = None,
     collection: str | None = None,
     media_type: MediaType | None = None,
     allow_fallback: bool = False,
-) -> bool:
-    match weave_media_into_addon(
+) -> tuple[CatalogIndex, bool]:
+    """Resolves `BoundMediaItem` and upserts it into `index` in memory without disk I/O."""
+    bound = resolve_bound_media_item(
         display_title=display_title,
         info_hash=info_hash,
         torrent_id=torrent_id,
         files=files,
-        addon_dir=addon_dir,
         fetch_html=http_client.fetch_html,
         explicit_url=url,
         explicit_slug=slug,
         collection_override=collection,
         media_type_override=media_type,
         allow_fallback=allow_fallback,
-        addon_config=addon_config,
-    ):
-        case Ok(outcome) if outcome is not None:
-            _print_weave_outcome(outcome, addon_dir)
-            return True
-        case _:
-            return False
+    )
+    if bound is None:
+        return index, False
+    _print_weave_outcome(bound, addon_dir)
+    return upsert_media_item(index, bound), True
 
 
 def _maybe_publish_addon(addon_dir: Path, message: str) -> None:
@@ -273,7 +321,7 @@ def _expand_cli_targets(
     if from_file is not None:
         fpath = from_file.expanduser()
         if not fpath.exists():
-            return Err(StreamWeaverError(f"File not found: {fpath}"))
+            return Err(ContrabandError(f"File not found: {fpath}"))
         text = fpath.read_text(encoding="utf-8", errors="replace")
         found = extract_magnets_from_text(text)
         file_extractions.append((fpath.name, len(found)))
@@ -339,38 +387,39 @@ def _discover_synced_torrent_ids(addon_dir: Path) -> set[int]:
 def cmd_list() -> None:
     """List all active, completed, and queued torrents in your TorBox Cloud Library."""
     _, env, _ = _resolve_context()
-    debrid = _require_torbox_provider(env, HttpxClient())
+    with HttpxClient() as http_client:
+        debrid = _require_torbox_provider(env, http_client)
 
-    match debrid.list_queued():
-        case Ok(q_items) if q_items:
-            console.print(
-                f"⏳ TorBox Cloud Queue ({len(q_items)} items — Web UI only displays 12 at a time):\n"
-            )
-            for idx, qitem in enumerate(q_items, start=1):
-                console.print(f"  Q{idx:02d}. 🕒 Queued (ID: {qitem.id}) | {qitem.name}")
-            console.print()
-        case _:
-            q_items = ()
-
-    match debrid.list_library():
-        case Err(err):
-            err_console.print(f"❌ {err}")
-            raise typer.Exit(code=1)
-        case Ok(items):
-            if not items and not q_items:
-                console.print("📭 Your TorBox Cloud Library is currently empty.")
-                return
-            console.print(f"📚 TorBox Cloud Library ({len(items)} items — all searchable in Nuvio):\n")
-            for idx, item in enumerate(items, start=1):
-                size_str = format_bytes(item.size_bytes)
-                badge = (
-                    "✅ Ready"
-                    if item.download_finished
-                    else f"⏳ {item.download_state} ({item.progress * 100.0:.1f}%)"
-                )
+        match debrid.list_queued():
+            case Ok(q_items) if q_items:
                 console.print(
-                    f"  {idx:2d}. {badge} | {size_str:>10} | {item.video_count:2d} videos | {item.name}"
+                    f"⏳ TorBox Cloud Queue ({len(q_items)} items — Web UI only displays 12 at a time):\n"
                 )
+                for idx, qitem in enumerate(q_items, start=1):
+                    console.print(f"  Q{idx:02d}. 🕒 Queued (ID: {qitem.id}) | {qitem.name}")
+                console.print()
+            case _:
+                q_items = ()
+
+        match debrid.list_library():
+            case Err(err):
+                err_console.print(f"❌ {err}")
+                raise typer.Exit(code=1)
+            case Ok(items):
+                if not items and not q_items:
+                    console.print("📭 Your TorBox Cloud Library is currently empty.")
+                    return
+                console.print(f"📚 TorBox Cloud Library ({len(items)} items — all searchable in Nuvio):\n")
+                for idx, item in enumerate(items, start=1):
+                    size_str = format_bytes(item.size_bytes)
+                    badge = (
+                        "✅ Ready"
+                        if item.download_finished
+                        else f"⏳ {item.download_state} ({item.progress * 100.0:.1f}%)"
+                    )
+                    console.print(
+                        f"  {idx:2d}. {badge} | {size_str:>10} | {item.video_count:2d} videos | {item.name}"
+                    )
 
 
 @app.command("sync")
@@ -382,52 +431,61 @@ def cmd_sync(
 ) -> None:
     """Scan TorBox Cloud Library, weave Contraband metadata for finished downloads, and promote queued slots."""
     addon_dir, env, addon_cfg = _resolve_context()
-    http_client = HttpxClient()
-    debrid = _require_torbox_provider(env, http_client)
+    with HttpxClient() as http_client:
+        debrid = _require_torbox_provider(env, http_client)
 
-    match debrid.list_library():
-        case Err(err):
-            err_console.print(f"❌ {err}")
-            raise typer.Exit(code=1)
-        case Ok(library_items):
-            pass
+        match debrid.list_library():
+            case Err(err):
+                err_console.print(f"❌ {err}")
+                raise typer.Exit(code=1)
+            case Ok(library_items):
+                pass
 
-    q_items: tuple[DebridQueuedItem, ...] = (
-        q_res.value if isinstance(q_res := debrid.list_queued(), Ok) else ()
-    )
-
-    built_count = 0
-    active_count = 0
-
-    for item in library_items:
-        if not item.id or not item.name or not item.info_hash:
-            continue
-        if not item.download_finished:
-            active_count += 1
-            continue
-        if _weave_and_log(
-            display_title=item.name,
-            info_hash=item.info_hash,
-            torrent_id=item.id,
-            files=item.files,
-            addon_dir=addon_dir,
-            http_client=http_client,
-            addon_config=addon_cfg,
-            allow_fallback=weave_all,
-        ):
-            built_count += 1
-
-    new_active, promoted, remaining_q = _promote_queued_slots(debrid, active_count, q_items)
-    for prom in promoted:
-        console.print(
-            f"🚀 [TorBox Queue] Promoted queued download to active slot: {prom.name} (Queue ID: {prom.id})"
+        q_items: tuple[DebridQueuedItem, ...] = (
+            q_res.value if isinstance(q_res := debrid.list_queued(), Ok) else ()
         )
-    if built_count > 0:
-        _maybe_publish_addon(addon_dir, f"feat(catalog): Sync {built_count} completed item(s) from TorBox")
-    console.print(
-        f"\n✅ Synced metadata for {built_count} completed item(s) in Contraband "
-        f"({new_active} actively downloading, {len(remaining_q)} waiting in TorBox Cloud Queue)."
-    )
+
+        catalog_index = load_catalog_index(addon_dir)
+        built_count = 0
+        active_count = 0
+
+        for item in library_items:
+            if not item.id or not item.name or not item.info_hash:
+                continue
+            if not item.download_finished:
+                active_count += 1
+                continue
+            catalog_index, woven = _weave_into_index_and_log(
+                index=catalog_index,
+                display_title=item.name,
+                info_hash=item.info_hash,
+                torrent_id=item.id,
+                files=item.files,
+                addon_dir=addon_dir,
+                http_client=http_client,
+                allow_fallback=weave_all,
+            )
+            if woven:
+                built_count += 1
+
+        if built_count > 0 and isinstance(
+            commit_err := commit_catalog_index(addon_dir, catalog_index, addon_config=addon_cfg),
+            Err,
+        ):
+            err_console.print(f"❌ {commit_err.error}")
+            raise typer.Exit(code=1)
+
+        new_active, promoted, remaining_q = _promote_queued_slots(debrid, active_count, q_items)
+        for prom in promoted:
+            console.print(
+                f"🚀 [TorBox Queue] Promoted queued download to active slot: {prom.name} (Queue ID: {prom.id})"
+            )
+        if built_count > 0:
+            _maybe_publish_addon(addon_dir, f"feat(catalog): Sync {built_count} completed item(s) from TorBox")
+        console.print(
+            f"\n✅ Synced metadata for {built_count} completed item(s) in Contraband "
+            f"({new_active} actively downloading, {len(remaining_q)} waiting in TorBox Cloud Queue)."
+        )
 
 
 @app.command("watch")
@@ -447,70 +505,75 @@ def cmd_watch(
 ) -> None:
     """Continuously drain the TorBox queue, keeping parallel slots active and publishing finished items."""
     addon_dir, env, addon_cfg = _resolve_context()
-    http_client = HttpxClient()
-    debrid = _require_torbox_provider(env, http_client, max_active=max_active)
+    with HttpxClient() as http_client:
+        debrid = _require_torbox_provider(env, http_client, max_active=max_active)
 
-    synced_ids = _discover_synced_torrent_ids(addon_dir)
-    console.print(
-        f"👀 Watching TorBox Queue — keeping {max_active} parallel slots active & auto-syncing finished downloads..."
-    )
-
-    while True:
-        lib_items: tuple[DebridTorrentItem, ...] = (
-            lib_res.value if isinstance(lib_res := debrid.list_library(), Ok) else ()
-        )
-        q_items: tuple[DebridQueuedItem, ...] = (
-            q_res.value if isinstance(q_res := debrid.list_queued(), Ok) else ()
-        )
-
-        active_items: list[DebridTorrentItem] = []
-        newly_synced = 0
-
-        for item in lib_items:
-            if not item.id or not item.name or not item.info_hash:
-                continue
-            if not item.download_finished or not item.files:
-                active_items.append(item)
-            elif item.id not in synced_ids:
-                if _weave_and_log(
-                    display_title=item.name,
-                    info_hash=item.info_hash,
-                    torrent_id=item.id,
-                    files=item.files,
-                    addon_dir=addon_dir,
-                    http_client=http_client,
-                    addon_config=addon_cfg,
-                    allow_fallback=weave_all,
-                ):
-                    newly_synced += 1
-                synced_ids.add(item.id)
-
-        if newly_synced > 0:
-            _maybe_publish_addon(
-                addon_dir, f"feat(catalog): Auto-sync {newly_synced} newly completed download(s)"
-            )
-
-        active_count, promoted, remaining_q = _promote_queued_slots(
-            debrid, len(active_items), q_items
-        )
-        for prom in promoted:
-            console.print(
-                f"🚀 [TorBox Queue] Started next download ({active_count}/{max_active} active, "
-                f"{len(remaining_q)} queued): {prom.name}"
-            )
-
-        if active_count == 0 and not remaining_q:
-            _maybe_publish_addon(addon_dir, "feat(catalog): Finalize Contraband queue sync")
-            if _refresh_aiostreams_cache(addon_dir, http_client):
-                console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
-            console.print("\n🎉 All queued TorBox downloads have finished and published to Contraband!")
-            return
-
-        prog_summary = ", ".join(f"{a.name[:28]} ({a.progress * 100:.0f}%)" for a in active_items)
+        synced_ids = _discover_synced_torrent_ids(addon_dir)
         console.print(
-            f"⏳ Active: {active_count}/{max_active} [{prog_summary or 'starting...'}] | Queued: {len(remaining_q)}"
+            f"👀 Watching TorBox Queue — keeping {max_active} parallel slots active & auto-syncing finished downloads..."
         )
-        time.sleep(poll_seconds)
+
+        while True:
+            lib_items: tuple[DebridTorrentItem, ...] = (
+                lib_res.value if isinstance(lib_res := debrid.list_library(), Ok) else ()
+            )
+            q_items: tuple[DebridQueuedItem, ...] = (
+                q_res.value if isinstance(q_res := debrid.list_queued(), Ok) else ()
+            )
+
+            active_items: list[DebridTorrentItem] = []
+            newly_synced = 0
+            catalog_index: CatalogIndex | None = None
+
+            for item in lib_items:
+                if not item.id or not item.name or not item.info_hash:
+                    continue
+                if not item.download_finished or not item.files:
+                    active_items.append(item)
+                elif item.id not in synced_ids:
+                    if catalog_index is None:
+                        catalog_index = load_catalog_index(addon_dir)
+                    catalog_index, woven = _weave_into_index_and_log(
+                        index=catalog_index,
+                        display_title=item.name,
+                        info_hash=item.info_hash,
+                        torrent_id=item.id,
+                        files=item.files,
+                        addon_dir=addon_dir,
+                        http_client=http_client,
+                        allow_fallback=weave_all,
+                    )
+                    if woven:
+                        newly_synced += 1
+                    synced_ids.add(item.id)
+
+            if newly_synced > 0 and catalog_index is not None:
+                commit_catalog_index(addon_dir, catalog_index, addon_config=addon_cfg)
+                _maybe_publish_addon(
+                    addon_dir, f"feat(catalog): Auto-sync {newly_synced} newly completed download(s)"
+                )
+
+            active_count, promoted, remaining_q = _promote_queued_slots(
+                debrid, len(active_items), q_items
+            )
+            for prom in promoted:
+                console.print(
+                    f"🚀 [TorBox Queue] Started next download ({active_count}/{max_active} active, "
+                    f"{len(remaining_q)} queued): {prom.name}"
+                )
+
+            if active_count == 0 and not remaining_q:
+                _maybe_publish_addon(addon_dir, "feat(catalog): Finalize Contraband queue sync")
+                if _refresh_aiostreams_cache(addon_dir, http_client):
+                    console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
+                console.print("\n🎉 All queued TorBox downloads have finished and published to Contraband!")
+                return
+
+            prog_summary = ", ".join(f"{a.name[:28]} ({a.progress * 100:.0f}%)" for a in active_items)
+            console.print(
+                f"⏳ Active: {active_count}/{max_active} [{prog_summary or 'starting...'}] | Queued: {len(remaining_q)}"
+            )
+            time.sleep(poll_seconds)
 
 
 @app.command("add")
@@ -551,8 +614,6 @@ def cmd_add(
     """Add magnet links, .md lists, or .torrent files to TorBox and weave Contraband metadata."""
     addon_dir, env, addon_cfg = _resolve_context()
     resolved_mtype = _parse_media_type_option(media_type)
-    http_client = HttpxClient()
-    debrid = _require_torbox_provider(env, http_client)
 
     match _expand_cli_targets(targets or [], from_file=from_file):
         case Err(err):
@@ -566,194 +627,209 @@ def cmd_add(
         err_console.print("❌ No magnet targets or .torrent files specified.")
         raise typer.Exit(code=1)
 
-    library_by_hash: dict[str, DebridTorrentItem] = {}
-    queued_by_hash: dict[str, DebridQueuedItem] = {}
-    active_downloads = 0
+    with HttpxClient() as http_client:
+        debrid = _require_torbox_provider(env, http_client)
 
-    if isinstance(lib_res := debrid.list_library(), Ok):
-        for item in lib_res.value:
-            if item.info_hash:
-                library_by_hash[item.info_hash] = item
-            if not item.download_finished:
-                active_downloads += 1
+        library_by_hash: dict[str, DebridTorrentItem] = {}
+        queued_by_hash: dict[str, DebridQueuedItem] = {}
+        active_downloads = 0
 
-    if isinstance(q_res := debrid.list_queued(), Ok):
-        for qitem in q_res.value:
-            if qitem.info_hash:
-                queued_by_hash[qitem.info_hash] = qitem
+        if isinstance(lib_res := debrid.list_library(), Ok):
+            for item in lib_res.value:
+                if item.info_hash:
+                    library_by_hash[item.info_hash] = item
+                if not item.download_finished:
+                    active_downloads += 1
 
-    added_any = False
-    cached_count = 0
-    queued_count = 0
-    failed_count = 0
+        if isinstance(q_res := debrid.list_queued(), Ok):
+            for qitem in q_res.value:
+                if qitem.info_hash:
+                    queued_by_hash[qitem.info_hash] = qitem
 
-    for idx, raw_target in enumerate(expanded_targets, start=1):
-        prefix_label = f"[{idx}/{len(expanded_targets)}] " if len(expanded_targets) > 1 else ""
-        t_path: Path | None = None
-        if not raw_target.lower().startswith("magnet:?") and len(raw_target) < 255:
-            try:
-                cand = Path(raw_target).expanduser()
-                if cand.exists() and cand.is_file():
-                    t_path = cand
-            except OSError:
-                t_path = None
+        catalog_index = load_catalog_index(addon_dir)
+        index_dirty = False
+        added_any = False
+        cached_count = 0
+        queued_count = 0
+        failed_count = 0
 
-        dn: str | None = None
-        if t_path is not None:
-            console.print(f"\n📦 {prefix_label}Inspecting .torrent file: {t_path.name}")
-            match parse_torrent_bytes(t_path.read_bytes(), fallback_name=t_path.stem):
-                case Err(err):
-                    err_console.print(f"❌ {err}")
-                    failed_count += 1
-                    continue
-                case Ok(parsed_t):
-                    info_hash = parsed_t.info_hash
-                    display_title = name or parsed_t.name
-                    magnet_uri = parsed_t.magnet_uri
-                    dn = parsed_t.name
-                    console.print(f"   • Name:       {parsed_t.name}")
-                    console.print(f"   • InfoHash:   {info_hash}")
-                    console.print(
-                        f"   • Total Size: {format_bytes(parsed_t.total_bytes)} ({len(parsed_t.video_files)} video files)"
-                    )
-                    if parsed_t.total_bytes > MAX_ESSENTIAL_BYTES:
+        for idx, raw_target in enumerate(expanded_targets, start=1):
+            prefix_label = f"[{idx}/{len(expanded_targets)}] " if len(expanded_targets) > 1 else ""
+            t_path: Path | None = None
+            if not raw_target.lower().startswith("magnet:?") and len(raw_target) < 255:
+                try:
+                    cand = Path(raw_target).expanduser()
+                    if cand.exists() and cand.is_file():
+                        t_path = cand
+                except OSError:
+                    t_path = None
+
+            dn: str | None = None
+            if t_path is not None:
+                console.print(f"\n📦 {prefix_label}Inspecting .torrent file: {t_path.name}")
+                match parse_torrent_bytes(t_path.read_bytes(), fallback_name=t_path.stem):
+                    case Err(err):
+                        err_console.print(f"❌ {err}")
+                        failed_count += 1
+                        continue
+                    case Ok(parsed_t):
+                        info_hash = parsed_t.info_hash
+                        display_title = name or parsed_t.name
+                        magnet_uri = parsed_t.magnet_uri
+                        dn = parsed_t.name
+                        console.print(f"   • Name:       {parsed_t.name}")
+                        console.print(f"   • InfoHash:   {info_hash}")
                         console.print(
-                            f"   ⚠️  Warning: Torrent size ({format_bytes(parsed_t.total_bytes)}) exceeds the 200 GB Essential plan limit!"
+                            f"   • Total Size: {format_bytes(parsed_t.total_bytes)} ({len(parsed_t.video_files)} video files)"
                         )
-        else:
-            match parse_magnet_uri(raw_target):
-                case Err(err):
-                    err_console.print(f"❌ {err}")
-                    failed_count += 1
-                    continue
-                case Ok(mag):
-                    info_hash = mag.info_hash
-                    magnet_uri = mag.magnet_uri
-                    dn = mag.display_name
-                    display_title = name or dn or info_hash
-                    console.print(f"\n🧲 {prefix_label}Inspecting magnet: {display_title}")
-                    console.print(f"   • InfoHash:   {info_hash}")
-
-        ih_lower = info_hash.lower()
-        if ih_lower in library_by_hash:
-            lib_item = library_by_hash[ih_lower]
-            if lib_item.download_finished:
-                cached_count += 1
-                console.print(f"   • Status:     ⚡ Already in TorBox Library & Ready (ID: {lib_item.id})")
+                        if parsed_t.total_bytes > MAX_ESSENTIAL_BYTES:
+                            console.print(
+                                f"   ⚠️  Warning: Torrent size ({format_bytes(parsed_t.total_bytes)}) exceeds the 200 GB Essential plan limit!"
+                            )
             else:
-                queued_count += 1
-                console.print(
-                    f"   • Status:     ⏳ Actively Downloading on TorBox ({lib_item.progress * 100:.1f}%, ID: {lib_item.id})"
-                )
-            _weave_and_log(
-                display_title=display_title,
-                info_hash=info_hash,
-                torrent_id=lib_item.id if lib_item.download_finished else 0,
-                files=lib_item.files if lib_item.download_finished else (),
-                addon_dir=addon_dir,
-                http_client=http_client,
-                addon_config=addon_cfg,
-                url=url,
-                slug=slug,
-                collection=collection,
-                media_type=resolved_mtype,
-                allow_fallback=weave_all,
-            )
-            added_any = True
-            continue
+                match parse_magnet_uri(raw_target):
+                    case Err(err):
+                        err_console.print(f"❌ {err}")
+                        failed_count += 1
+                        continue
+                    case Ok(mag):
+                        info_hash = mag.info_hash
+                        magnet_uri = mag.magnet_uri
+                        dn = mag.display_name
+                        display_title = name or dn or info_hash
+                        console.print(f"\n🧲 {prefix_label}Inspecting magnet: {display_title}")
+                        console.print(f"   • InfoHash:   {info_hash}")
 
-        if ih_lower in queued_by_hash:
-            q_item = queued_by_hash[ih_lower]
-            queued_count += 1
-            console.print(f"   • Status:     ⏳ Already Queued on TorBox (Queue ID: {q_item.id})")
-            _weave_and_log(
-                display_title=display_title,
-                info_hash=info_hash,
-                torrent_id=0,
-                files=(),
-                addon_dir=addon_dir,
-                http_client=http_client,
-                addon_config=addon_cfg,
-                url=url,
-                slug=slug,
-                collection=collection,
-                media_type=resolved_mtype,
-                allow_fallback=weave_all,
-            )
-            added_any = True
-            continue
-
-        is_cached = False
-        if isinstance(cache_res := debrid.check_cached(info_hash), Ok) and cache_res.value.is_cached:
-            is_cached = True
-            c_info = cache_res.value
-            console.print(
-                f"   • Status:     ⚡ INSTANTLY CACHED on TorBox ({format_bytes(c_info.size_bytes)}, {len(c_info.files)} files)"
-            )
-            if c_info.size_bytes > MAX_ESSENTIAL_BYTES:
-                console.print(
-                    f"   ⚠️  Warning: Torrent size ({format_bytes(c_info.size_bytes)}) exceeds the 200 GB Essential plan limit!"
-                )
-            should_queue = False
-        else:
-            console.print("   • Status:     ⏳ Uncached (TorBox will queue & download it in the cloud)")
-            should_queue = active_downloads >= debrid.max_active_downloads
-
-        add_res = (
-            debrid.add_torrent_file(t_path, t_path.read_bytes(), as_queued=should_queue)
-            if t_path is not None
-            else debrid.add_magnet(magnet_uri, name=name or dn, as_queued=should_queue)
-        )
-
-        match add_res:
-            case Err(err):
-                failed_count += 1
-                err_console.print(f"   ❌ [TorBox] {err}")
-            case Ok(add_outcome):
-                if is_cached or add_outcome.was_cached:
+            ih_lower = info_hash.lower()
+            if ih_lower in library_by_hash:
+                lib_item = library_by_hash[ih_lower]
+                if lib_item.download_finished:
                     cached_count += 1
+                    console.print(f"   • Status:     ⚡ Already in TorBox Library & Ready (ID: {lib_item.id})")
                 else:
                     queued_count += 1
-                    if not should_queue and add_outcome.torrent_id is not None:
-                        active_downloads += 1
-                id_display = add_outcome.torrent_id or add_outcome.queued_id
-                console.print(
-                    f"   ✅ [TorBox] {add_outcome.detail}"
-                    + (f" (ID: {id_display})" if id_display else "")
-                )
-
-                real_tid = add_outcome.torrent_id if (add_outcome.torrent_id and is_cached) else 0
-                fetched_files: tuple[TorrentFileEntry, ...] = ()
-                if real_tid and isinstance(f_res := debrid.fetch_torrent_files(real_tid), Ok):
-                    fetched_files = f_res.value
-
-                _weave_and_log(
+                    console.print(
+                        f"   • Status:     ⏳ Actively Downloading on TorBox ({lib_item.progress * 100:.1f}%, ID: {lib_item.id})"
+                    )
+                catalog_index, woven = _weave_into_index_and_log(
+                    index=catalog_index,
                     display_title=display_title,
                     info_hash=info_hash,
-                    torrent_id=real_tid,
-                    files=fetched_files,
+                    torrent_id=lib_item.id if lib_item.download_finished else 0,
+                    files=lib_item.files if lib_item.download_finished else (),
                     addon_dir=addon_dir,
                     http_client=http_client,
-                    addon_config=addon_cfg,
                     url=url,
                     slug=slug,
                     collection=collection,
                     media_type=resolved_mtype,
                     allow_fallback=weave_all,
                 )
+                index_dirty = index_dirty or woven
                 added_any = True
+                continue
 
-    if len(expanded_targets) > 1:
-        console.print(
-            f"\n📊 Batch Summary: {cached_count} instantly cached, {queued_count} queued on TorBox, {failed_count} failed."
-        )
+            if ih_lower in queued_by_hash:
+                q_item = queued_by_hash[ih_lower]
+                queued_count += 1
+                console.print(f"   • Status:     ⏳ Already Queued on TorBox (Queue ID: {q_item.id})")
+                catalog_index, woven = _weave_into_index_and_log(
+                    index=catalog_index,
+                    display_title=display_title,
+                    info_hash=info_hash,
+                    torrent_id=0,
+                    files=(),
+                    addon_dir=addon_dir,
+                    http_client=http_client,
+                    url=url,
+                    slug=slug,
+                    collection=collection,
+                    media_type=resolved_mtype,
+                    allow_fallback=weave_all,
+                )
+                index_dirty = index_dirty or woven
+                added_any = True
+                continue
 
-    if added_any:
-        _maybe_publish_addon(addon_dir, "feat(catalog): Add new Contraband metadata and stream links")
-        if _refresh_aiostreams_cache(addon_dir, http_client):
-            console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
-        console.print("\n🎬 Done! Open Nuvio or Stremio on Home to watch.")
-        return
+            is_cached = False
+            if isinstance(cache_res := debrid.check_cached(info_hash), Ok) and cache_res.value.is_cached:
+                is_cached = True
+                c_info = cache_res.value
+                console.print(
+                    f"   • Status:     ⚡ INSTANTLY CACHED on TorBox ({format_bytes(c_info.size_bytes)}, {len(c_info.files)} files)"
+                )
+                if c_info.size_bytes > MAX_ESSENTIAL_BYTES:
+                    console.print(
+                        f"   ⚠️  Warning: Torrent size ({format_bytes(c_info.size_bytes)}) exceeds the 200 GB Essential plan limit!"
+                    )
+                should_queue = False
+            else:
+                console.print("   • Status:     ⏳ Uncached (TorBox will queue & download it in the cloud)")
+                should_queue = active_downloads >= debrid.max_active_downloads
+
+            add_res = (
+                debrid.add_torrent_file(t_path, t_path.read_bytes(), as_queued=should_queue)
+                if t_path is not None
+                else debrid.add_magnet(magnet_uri, name=name or dn, as_queued=should_queue)
+            )
+
+            match add_res:
+                case Err(err):
+                    failed_count += 1
+                    err_console.print(f"   ❌ [TorBox] {err}")
+                case Ok(add_outcome):
+                    if is_cached or add_outcome.was_cached:
+                        cached_count += 1
+                    else:
+                        queued_count += 1
+                        if not should_queue and add_outcome.torrent_id is not None:
+                            active_downloads += 1
+                    id_display = add_outcome.torrent_id or add_outcome.queued_id
+                    console.print(
+                        f"   ✅ [TorBox] {add_outcome.detail}"
+                        + (f" (ID: {id_display})" if id_display else "")
+                    )
+
+                    real_tid = add_outcome.torrent_id if (add_outcome.torrent_id and is_cached) else 0
+                    fetched_files: tuple[TorrentFileEntry, ...] = ()
+                    if real_tid and isinstance(f_res := debrid.fetch_torrent_files(real_tid), Ok):
+                        fetched_files = f_res.value
+
+                    catalog_index, woven = _weave_into_index_and_log(
+                        index=catalog_index,
+                        display_title=display_title,
+                        info_hash=info_hash,
+                        torrent_id=real_tid,
+                        files=fetched_files,
+                        addon_dir=addon_dir,
+                        http_client=http_client,
+                        url=url,
+                        slug=slug,
+                        collection=collection,
+                        media_type=resolved_mtype,
+                        allow_fallback=weave_all,
+                    )
+                    index_dirty = index_dirty or woven
+                    added_any = True
+
+        if index_dirty and isinstance(
+            commit_err := commit_catalog_index(addon_dir, catalog_index, addon_config=addon_cfg),
+            Err,
+        ):
+            err_console.print(f"❌ {commit_err.error}")
+            raise typer.Exit(code=1)
+
+        if len(expanded_targets) > 1:
+            console.print(
+                f"\n📊 Batch Summary: {cached_count} instantly cached, {queued_count} queued on TorBox, {failed_count} failed."
+            )
+
+        if added_any:
+            _maybe_publish_addon(addon_dir, "feat(catalog): Add new Contraband metadata and stream links")
+            if _refresh_aiostreams_cache(addon_dir, http_client):
+                console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
+            console.print("\n🎬 Done! Open Nuvio or Stremio on Home to watch.")
+            return
 
     raise typer.Exit(code=1)
 
@@ -800,31 +876,33 @@ def cmd_build(
     """Build static Stremio metadata for Contraband (courses, specials, documentaries, series, or movies)."""
     addon_dir, env, addon_cfg = _resolve_context()
     resolved_mtype = _parse_media_type_option(media_type)
-    http_client = HttpxClient()
 
-    api_key = env.get("SECRET_TORBOX_API_KEY", "")
-    tb_files: tuple[TorrentFileEntry, ...] = ()
-    if torrent_id and api_key:
-        debrid = TorBoxProvider(api_key=api_key, http_client=http_client)
-        if isinstance(f_res := debrid.fetch_torrent_files(torrent_id), Ok):
-            tb_files = f_res.value
+    with HttpxClient() as http_client:
+        api_key = env.get("SECRET_TORBOX_API_KEY", "")
+        tb_files: tuple[TorrentFileEntry, ...] = ()
+        if torrent_id and api_key:
+            debrid = TorBoxProvider(api_key=api_key, http_client=http_client)
+            if isinstance(f_res := debrid.fetch_torrent_files(torrent_id), Ok):
+                tb_files = f_res.value
 
-    display_title = title or slug or url or info_hash
-    match weave_media_into_addon(
-        display_title=display_title,
-        info_hash=info_hash,
-        torrent_id=torrent_id,
-        files=tb_files,
-        addon_dir=addon_dir,
-        fetch_html=http_client.fetch_html,
-        explicit_url=url,
-        explicit_slug=slug,
-        collection_override=collection,
-        media_type_override=resolved_mtype,
-        allow_fallback=True,
-        clean_before_build=clean,
-        addon_config=addon_cfg,
-    ):
+        display_title = title or slug or url or info_hash
+        build_res = weave_media_into_addon(
+            display_title=display_title,
+            info_hash=info_hash,
+            torrent_id=torrent_id,
+            files=tb_files,
+            addon_dir=addon_dir,
+            fetch_html=http_client.fetch_html,
+            explicit_url=url,
+            explicit_slug=slug,
+            collection_override=collection,
+            media_type_override=resolved_mtype,
+            allow_fallback=True,
+            clean_before_build=clean,
+            addon_config=addon_cfg,
+        )
+
+    match build_res:
         case Err(err):
             err_console.print(f"❌ {err}")
             raise typer.Exit(code=1)

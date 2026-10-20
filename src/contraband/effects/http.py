@@ -1,16 +1,17 @@
-"""Typed HTTP client adapter using `httpx` with explicit `Result` returns."""
+"""Typed HTTP client adapter using `httpx` with connection pooling and explicit `Result` returns."""
 
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol
+from types import TracebackType
+from typing import Any, Protocol, Self
 
 import httpx
 
 from contraband.core.errors import NetworkError
 from contraband.core.result import Err, Ok, Result
 
-DEFAULT_USER_AGENT = "Stream-Weaver-CLI/2.0"
+DEFAULT_USER_AGENT = "Contraband-CLI/2.0"
 BROWSER_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -44,7 +45,25 @@ class HttpClientProtocol(Protocol):
 
 
 class HttpxClient:
-    """Production `HttpClientProtocol` implementation backed by `httpx`."""
+    """Production `HttpClientProtocol` implementation backed by a pooled `httpx.Client`."""
+
+    def __init__(self) -> None:
+        self._client = httpx.Client(follow_redirects=True)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """Closes the underlying connection pool."""
+        self._client.close()
 
     def request_json(
         self,
@@ -72,13 +91,13 @@ class HttpxClient:
             req_headers.setdefault("Content-Type", "application/json")
 
         try:
-            with httpx.Client(timeout=timeout, follow_redirects=True) as client:
-                resp = client.request(
-                    method=method,
-                    url=url,
-                    headers=req_headers,
-                    content=content_bytes,
-                )
+            resp = self._client.request(
+                method=method,
+                url=url,
+                headers=req_headers,
+                content=content_bytes,
+                timeout=timeout,
+            )
         except httpx.HTTPError as exc:
             return Err(
                 NetworkError(
@@ -109,16 +128,16 @@ class HttpxClient:
         if not url.startswith(("https://", "http://")):
             return None
         try:
-            with httpx.Client(timeout=timeout, follow_redirects=True) as client:
-                resp = client.get(
-                    url,
-                    headers={
-                        "User-Agent": BROWSER_USER_AGENT,
-                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                    },
-                )
-                if resp.status_code == 200:
-                    return resp.text
-                return None
+            resp = self._client.get(
+                url,
+                headers={
+                    "User-Agent": BROWSER_USER_AGENT,
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                },
+                timeout=timeout,
+            )
+            if resp.status_code == 200:
+                return resp.text
+            return None
         except httpx.HTTPError:
             return None

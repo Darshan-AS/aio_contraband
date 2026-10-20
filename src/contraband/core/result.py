@@ -3,7 +3,7 @@
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
-from contraband.core.errors import StreamWeaverError
+from contraband.core.errors import ContrabandError
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,7 +20,7 @@ class Ok[T]:
 
 
 @dataclass(frozen=True, slots=True)
-class Err[E = StreamWeaverError]:
+class Err[E = ContrabandError]:
     """Represents a failed computation holding an immutable domain error."""
 
     error: E
@@ -32,7 +32,7 @@ class Err[E = StreamWeaverError]:
         return True
 
 
-type Result[T, E = StreamWeaverError] = Ok[T] | Err[E]
+type Result[T, E = ContrabandError] = Ok[T] | Err[E]
 
 
 def map_result[T, E, U](result: Result[T, E], fn: Callable[[T], U]) -> Result[U, E]:

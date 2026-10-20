@@ -30,7 +30,7 @@ def build_multipart_form_body(
     Pure function: encodes `fields` and an optional `(field_name, filename, content_type, data)`
     into a `multipart/form-data` payload, returning `(content_type_header, body_bytes)`.
     """
-    sep = boundary or f"----StreamWeaverBoundary{uuid.uuid4().hex}"
+    sep = boundary or f"----ContrabandBoundary{uuid.uuid4().hex}"
     chunks: list[bytes] = []
 
     if file_field is not None:

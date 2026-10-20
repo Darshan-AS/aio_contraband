@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
-class StreamWeaverError:
+class ContrabandError:
     """Base immutable domain error."""
 
     message: str
@@ -13,37 +13,40 @@ class StreamWeaverError:
         return self.message
 
 
+type StreamWeaverError = ContrabandError
+
+
 @dataclass(frozen=True, slots=True)
-class SecretError(StreamWeaverError):
+class SecretError(ContrabandError):
     """Raised when required secrets are missing during config injection."""
 
     missing_keys: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
-class CryptoError(StreamWeaverError):
+class CryptoError(ContrabandError):
     """Raised when encryption or decryption of AIOManager envelopes fails."""
 
 
 @dataclass(frozen=True, slots=True)
-class ConfigValidationError(StreamWeaverError):
+class ConfigValidationError(ContrabandError):
     """Raised when a service configuration payload has an invalid structure."""
 
     service: str = ""
 
 
 @dataclass(frozen=True, slots=True)
-class BencodeError(StreamWeaverError):
+class BencodeError(ContrabandError):
     """Raised when decoding bencoded `.torrent` bytes fails."""
 
 
 @dataclass(frozen=True, slots=True)
-class ParseError(StreamWeaverError):
+class ParseError(ContrabandError):
     """Raised when parsing a magnet URI, course HTML, or catalog file fails."""
 
 
 @dataclass(frozen=True, slots=True)
-class NetworkError(StreamWeaverError):
+class NetworkError(ContrabandError):
     """Raised when an HTTP request fails or returns an unexpected status."""
 
     status_code: int = 0
@@ -51,12 +54,12 @@ class NetworkError(StreamWeaverError):
 
 
 @dataclass(frozen=True, slots=True)
-class StorageError(StreamWeaverError):
+class StorageError(ContrabandError):
     """Raised when a filesystem operation or path boundary check fails."""
 
     path: str = ""
 
 
 @dataclass(frozen=True, slots=True)
-class GitError(StreamWeaverError):
+class GitError(ContrabandError):
     """Raised when a Git repository operation fails."""
