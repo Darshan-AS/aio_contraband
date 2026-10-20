@@ -1,5 +1,6 @@
 """Contraband CLI (`cb`) — Static Stremio Addon Compiler & TorBox Cloud Ingestor."""
 
+import concurrent.futures
 import re
 import sys
 import time
@@ -9,7 +10,9 @@ from pathlib import Path
 from typing import Annotated, Any
 
 import typer
+from rich import box
 from rich.console import Console
+from rich.table import Table
 
 from contraband.core.bencode import (
     extract_magnets_from_text,
@@ -108,6 +111,16 @@ def _require_torbox_provider(
         err_console.print("❌ Error: SECRET_TORBOX_API_KEY is missing in .env")
         raise typer.Exit(code=1)
     return TorBoxProvider(api_key=api_key, http_client=http_client, max_active=max_active)
+
+
+def _fetch_library_and_queue_parallel(
+    debrid: DebridProviderProtocol,
+) -> tuple[Result[tuple[DebridTorrentItem, ...]], Result[tuple[DebridQueuedItem, ...]]]:
+    """Concurrently fetches the TorBox cloud library and queued items."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        lib_fut = pool.submit(debrid.list_library)
+        q_fut = pool.submit(debrid.list_queued)
+        return lib_fut.result(), q_fut.result()
 
 
 def resolve_bound_media_item(
@@ -391,19 +404,28 @@ def cmd_list() -> None:
     _, env, _ = _resolve_context()
     with HttpxClient() as http_client:
         debrid = _require_torbox_provider(env, http_client)
+        with console.status("⏳ Fetching TorBox Cloud Library & Queue in parallel..."):
+            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
 
-        match debrid.list_queued():
+        match q_res:
             case Ok(q_items) if q_items:
-                console.print(
-                    f"⏳ TorBox Cloud Queue ({len(q_items)} items — Web UI only displays 12 at a time):\n"
+                q_table = Table(
+                    title=f"⏳ TorBox Cloud Queue ({len(q_items)} items)",
+                    box=box.ROUNDED,
+                    header_style="bold",
                 )
+                q_table.add_column("#", justify="right")
+                q_table.add_column("Status")
+                q_table.add_column("Queue ID", justify="right")
+                q_table.add_column("Name")
                 for idx, qitem in enumerate(q_items, start=1):
-                    console.print(f"  Q{idx:02d}. 🕒 Queued (ID: {qitem.id}) | {qitem.name}")
+                    q_table.add_row(f"Q{idx:02d}", "🕒 Queued", str(qitem.id), qitem.name)
+                console.print(q_table)
                 console.print()
             case _:
                 q_items = ()
 
-        match debrid.list_library():
+        match lib_res:
             case Err(err):
                 err_console.print(f"❌ {err}")
                 raise typer.Exit(code=1)
@@ -411,7 +433,17 @@ def cmd_list() -> None:
                 if not items and not q_items:
                     console.print("📭 Your TorBox Cloud Library is currently empty.")
                     return
-                console.print(f"📚 TorBox Cloud Library ({len(items)} items — all searchable in Nuvio):\n")
+                lib_table = Table(
+                    title=f"📚 TorBox Cloud Library ({len(items)} items — searchable in Nuvio)",
+                    box=box.ROUNDED,
+                    header_style="bold",
+                )
+                lib_table.add_column("#", justify="right")
+                lib_table.add_column("Status")
+                lib_table.add_column("Size", justify="right")
+                lib_table.add_column("Videos", justify="right")
+                lib_table.add_column("ID", justify="right")
+                lib_table.add_column("Name")
                 for idx, item in enumerate(items, start=1):
                     size_str = format_bytes(item.size_bytes)
                     badge = (
@@ -419,9 +451,15 @@ def cmd_list() -> None:
                         if item.download_finished
                         else f"⏳ {item.download_state} ({item.progress * 100.0:.1f}%)"
                     )
-                    console.print(
-                        f"  {idx:2d}. {badge} | {size_str:>10} | {item.video_count:2d} videos | {item.name}"
+                    lib_table.add_row(
+                        str(idx),
+                        badge,
+                        size_str,
+                        str(item.video_count),
+                        str(item.id),
+                        item.name,
                     )
+                console.print(lib_table)
 
 
 @app.command("sync")
@@ -435,8 +473,10 @@ def cmd_sync(
     addon_dir, env, addon_cfg = _resolve_context()
     with HttpxClient() as http_client:
         debrid = _require_torbox_provider(env, http_client)
+        with console.status("⏳ Scanning TorBox Cloud Library & Queue in parallel..."):
+            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
 
-        match debrid.list_library():
+        match lib_res:
             case Err(err):
                 err_console.print(f"❌ {err}")
                 raise typer.Exit(code=1)
@@ -444,7 +484,7 @@ def cmd_sync(
                 pass
 
         q_items: tuple[DebridQueuedItem, ...] = (
-            q_res.value if isinstance(q_res := debrid.list_queued(), Ok) else ()
+            q_res.value if isinstance(q_res, Ok) else ()
         )
 
         catalog_index = load_catalog_index(addon_dir)
@@ -516,11 +556,12 @@ def cmd_watch(
         )
 
         while True:
+            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
             lib_items: tuple[DebridTorrentItem, ...] = (
-                lib_res.value if isinstance(lib_res := debrid.list_library(), Ok) else ()
+                lib_res.value if isinstance(lib_res, Ok) else ()
             )
             q_items: tuple[DebridQueuedItem, ...] = (
-                q_res.value if isinstance(q_res := debrid.list_queued(), Ok) else ()
+                q_res.value if isinstance(q_res, Ok) else ()
             )
 
             active_items: list[DebridTorrentItem] = []
@@ -636,14 +677,17 @@ def cmd_add(
         queued_by_hash: dict[str, DebridQueuedItem] = {}
         active_downloads = 0
 
-        if isinstance(lib_res := debrid.list_library(), Ok):
+        with console.status("⏳ Checking TorBox Cloud Library & Queue in parallel..."):
+            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
+
+        if isinstance(lib_res, Ok):
             for item in lib_res.value:
                 if item.info_hash:
                     library_by_hash[item.info_hash] = item
                 if not item.download_finished:
                     active_downloads += 1
 
-        if isinstance(q_res := debrid.list_queued(), Ok):
+        if isinstance(q_res, Ok):
             for qitem in q_res.value:
                 if qitem.info_hash:
                     queued_by_hash[qitem.info_hash] = qitem
@@ -990,10 +1034,12 @@ def cmd_doctor(
     active_hashes: set[str] | None = None
     api_key = env.get("SECRET_TORBOX_API_KEY", "")
     if not offline and api_key:
-        with HttpxClient() as http_client:
+        with (
+            HttpxClient() as http_client,
+            console.status("⏳ Cross-checking TorBox Cloud Library & Queue in parallel..."),
+        ):
             debrid = TorBoxProvider(api_key=api_key, http_client=http_client)
-            lib_res = debrid.list_library()
-            q_res = debrid.list_queued()
+            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
             if isinstance(lib_res, Ok):
                 hashes: set[str] = {
                     item.info_hash.lower() for item in lib_res.value if item.info_hash
@@ -1013,6 +1059,33 @@ def cmd_doctor(
         f"🩺 Contraband Addon Audit ({addon_dir.name}/): "
         f"{report.total_items} item(s) ({report.series_count} series, {report.movie_count} movies)"
     )
+
+    summary_table = Table(box=box.ROUNDED, header_style="bold")
+    summary_table.add_column("Check")
+    summary_table.add_column("Count", justify="right")
+    summary_table.add_column("Status")
+    summary_table.add_row(
+        "Catalog Items",
+        f"{report.total_items} ({report.series_count}S / {report.movie_count}M)",
+        "✅ Indexed",
+    )
+    summary_table.add_row(
+        "Unlinked / Queued Items",
+        str(len(report.unlinked_items)),
+        "✅ All Linked" if not report.unlinked_items else "⚠️  Needs `cb sync`",
+    )
+    if active_hashes is not None:
+        summary_table.add_row(
+            "Missing on TorBox",
+            str(len(report.missing_on_debrid)),
+            "✅ All Present" if not report.missing_on_debrid else "⚠️  Missing Hashes",
+        )
+    summary_table.add_row(
+        "Static File Drift",
+        str(len(report.orphaned_files) + len(report.missing_files) + len(report.stale_files)),
+        "✅ In Sync" if not report.has_fs_drift else "⚠️  Needs `cb doctor --fix`",
+    )
+    console.print(summary_table)
 
     if report.unlinked_items:
         console.print(f"\n⚠️  Unlinked / Queued Items ({len(report.unlinked_items)}):")
