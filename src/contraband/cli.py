@@ -18,7 +18,9 @@ from contraband.core.bencode import (
 )
 from contraband.core.compiler import (
     DEFAULT_ADDON_CONFIG,
+    audit_contraband_addon,
     compile_contraband_addon,
+    remove_media_items,
     seed_index_from_existing_files,
     upsert_media_item,
 )
@@ -920,6 +922,148 @@ def cmd_build(
             console.print(f"   Items:    {len(meta.episodes) or 1} mapped in {addon_dir}/")
             if publish:
                 _maybe_publish_addon(addon_dir, f"feat(catalog): Add {meta.title} ({meta.collection})")
+
+
+@app.command("remove")
+def cmd_remove(
+    target: Annotated[
+        str,
+        typer.Argument(
+            help="Stremio ID (e.g. 'sw_mc_999'), slug, infoHash, torrent ID, magnet URI, or title substring"
+        ),
+    ],
+    publish: Annotated[
+        bool,
+        typer.Option("--publish", help="Commit and push addon repo changes to GitHub after removal"),
+    ] = False,
+) -> None:
+    """Remove a media item from the Contraband catalog and prune its static meta/stream/catalog files."""
+    addon_dir, _, addon_cfg = _resolve_context()
+    current_index = load_catalog_index(addon_dir)
+    updated_index, removed_items = remove_media_items(current_index, target)
+
+    if not removed_items:
+        err_console.print(f"❌ No Contraband catalog item matched '{target}'.")
+        raise typer.Exit(code=1)
+
+    match commit_catalog_index(addon_dir, updated_index, addon_config=addon_cfg, clean=True):
+        case Err(err):
+            err_console.print(f"❌ {err}")
+            raise typer.Exit(code=1)
+        case Ok():
+            pass
+
+    for item in removed_items:
+        meta = item.metadata
+        console.print(
+            f"🗑️  Removed '{meta.title}' ({meta.stremio_id}) from collection '{meta.collection}'"
+        )
+
+    console.print(
+        f"✅ Pruned {len(removed_items)} item(s) — {len(updated_index.items)} item(s) remaining in {addon_dir.name}/."
+    )
+    if publish:
+        removed_titles = ", ".join(i.metadata.title for i in removed_items[:3])
+        _maybe_publish_addon(addon_dir, f"chore(catalog): Remove {removed_titles}")
+
+
+@app.command("doctor")
+def cmd_doctor(
+    fix: Annotated[
+        bool,
+        typer.Option("--fix", help="Recompile and prune orphaned/missing/stale static addon files"),
+    ] = False,
+    offline: Annotated[
+        bool,
+        typer.Option("--offline", help="Skip live TorBox library/queue cross-check"),
+    ] = False,
+    publish: Annotated[
+        bool,
+        typer.Option("--publish", help="Commit and push repaired addon files to GitHub (with --fix)"),
+    ] = False,
+) -> None:
+    """Audit Contraband static addon integrity, episode bindings, and live TorBox cloud status."""
+    addon_dir, env, addon_cfg = _resolve_context()
+    actual_vfs = read_addon_virtual_fs(addon_dir)
+    catalog_index = seed_index_from_existing_files(actual_vfs.files)
+
+    active_hashes: set[str] | None = None
+    api_key = env.get("SECRET_TORBOX_API_KEY", "")
+    if not offline and api_key:
+        with HttpxClient() as http_client:
+            debrid = TorBoxProvider(api_key=api_key, http_client=http_client)
+            lib_res = debrid.list_library()
+            q_res = debrid.list_queued()
+            if isinstance(lib_res, Ok):
+                hashes: set[str] = {
+                    item.info_hash.lower() for item in lib_res.value if item.info_hash
+                }
+                if isinstance(q_res, Ok):
+                    hashes.update(q.info_hash.lower() for q in q_res.value if q.info_hash)
+                active_hashes = hashes
+
+    report = audit_contraband_addon(
+        catalog_index,
+        actual_vfs,
+        addon_config=addon_cfg,
+        active_hashes=active_hashes,
+    )
+
+    console.print(
+        f"🩺 Contraband Addon Audit ({addon_dir.name}/): "
+        f"{report.total_items} item(s) ({report.series_count} series, {report.movie_count} movies)"
+    )
+
+    if report.unlinked_items:
+        console.print(f"\n⚠️  Unlinked / Queued Items ({len(report.unlinked_items)}):")
+        for item in report.unlinked_items:
+            console.print(
+                f"   • {item.metadata.title} ({item.metadata.stremio_id}) — torrent_id={item.torrent_id}, "
+                f"{len(item.episode_matches)} files linked (run `cb sync` once download completes)"
+            )
+
+    if report.missing_on_debrid:
+        console.print(f"\n⚠️  Missing from TorBox Cloud Library/Queue ({len(report.missing_on_debrid)}):")
+        for item in report.missing_on_debrid:
+            console.print(
+                f"   • {item.metadata.title} ({item.metadata.stremio_id}) — infoHash {item.info_hash}"
+            )
+
+    if report.orphaned_files:
+        console.print(f"\n🧹 Orphaned Static Files ({len(report.orphaned_files)}):")
+        for p in report.orphaned_files:
+            console.print(f"   • {p}")
+
+    if report.missing_files:
+        console.print(f"\n🕳️  Missing Static Files ({len(report.missing_files)}):")
+        for p in report.missing_files:
+            console.print(f"   • {p}")
+
+    if report.stale_files:
+        console.print(f"\n📝 Out-of-Sync Static Files ({len(report.stale_files)}):")
+        for p in report.stale_files:
+            console.print(f"   • {p}")
+
+    if fix and (report.has_fs_drift or not (addon_dir / "manifest.json").exists()):
+        match commit_catalog_index(addon_dir, catalog_index, addon_config=addon_cfg, clean=True):
+            case Err(err):
+                err_console.print(f"❌ Failed to repair static files: {err}")
+                raise typer.Exit(code=1)
+            case Ok(written):
+                console.print(
+                    f"\n🔧 Repaired static addon tree ({written} file(s) written, {len(report.orphaned_files)} orphan(s) pruned)."
+                )
+                if publish:
+                    _maybe_publish_addon(addon_dir, "chore(catalog): Repair and prune Contraband static addon tree")
+                return
+
+    if report.is_healthy:
+        console.print("\n✅ All catalog items and static Stremio addon files are healthy and in sync.")
+        return
+
+    if report.has_fs_drift and not fix:
+        console.print("\n💡 Tip: Run `cb doctor --fix` to recompile and prune out-of-sync static files.")
+    raise typer.Exit(code=1)
 
 
 @app.command("publish")

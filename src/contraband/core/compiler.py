@@ -11,6 +11,7 @@ from contraband.core.result import Err, Ok, Result
 from contraband.core.types import (
     AddonConfig,
     BoundMediaItem,
+    CatalogAuditReport,
     CatalogIndex,
     EpisodeFileMatch,
     EpisodeMetadata,
@@ -209,6 +210,7 @@ def seed_index_from_existing_files(
         info_hash = ""
         torrent_id = 0
         ep_thumb_default = ""
+        inferred_slug = ""
 
         if item_type == "movie":
             stream_rel = PurePosixPath("stream") / "movie" / f"{stremio_id}.json"
@@ -220,8 +222,11 @@ def seed_index_from_existing_files(
                         s0 = streams[0]
                         info_hash = str(s0.get("infoHash", "")).lower()
                         f_idx = int(s0.get("fileIdx", 0))
+                        hints = s0.get("behaviorHints")
+                        if isinstance(hints, dict) and isinstance(hints.get("bingeGroup"), str):
+                            inferred_slug = hints["bingeGroup"].removeprefix("sw-")
                         f_name = str(
-                            s0.get("behaviorHints", {}).get("filename")
+                            (hints.get("filename") if isinstance(hints, dict) else None)
                             or s0.get("title")
                             or f"{title}.mp4"
                         )
@@ -237,7 +242,7 @@ def seed_index_from_existing_files(
                 ep_num = int(vid.get("episode", 1))
                 season = int(vid.get("season", 1))
                 raw_vid_title = str(vid.get("title", ""))
-                ep_title = re.sub(rf"^{ep_num}\.\s*", "", raw_vid_title)
+                ep_title = re.sub(rf"^{ep_num}\.\s", "", raw_vid_title)
                 overview = str(vid.get("overview") or vid.get("description") or "")
                 dur_secs = 0
                 dur_m = re.search(r"⏱️\s*(\d+)\s*min", overview)
@@ -273,8 +278,15 @@ def seed_index_from_existing_files(
                             s0 = streams[0]
                             info_hash = str(s0.get("infoHash", info_hash)).lower()
                             f_idx = int(s0.get("fileIdx", ep_num - 1))
+                            hints = s0.get("behaviorHints")
+                            if (
+                                not inferred_slug
+                                and isinstance(hints, dict)
+                                and isinstance(hints.get("bingeGroup"), str)
+                            ):
+                                inferred_slug = hints["bingeGroup"].removeprefix("sw-")
                             f_name = str(
-                                s0.get("behaviorHints", {}).get("filename")
+                                (hints.get("filename") if isinstance(hints, dict) else None)
                                 or s0.get("title")
                                 or f"{ep_num}. {ep_title}.mp4"
                             )
@@ -303,7 +315,7 @@ def seed_index_from_existing_files(
                         episode_thumbnail=ep_thumb_default,
                         genres=genres,
                         episodes=tuple(episodes),
-                        slug=stremio_id,
+                        slug=inferred_slug or stremio_id,
                         media_type=item_type,
                     ),
                     info_hash=info_hash,
@@ -311,6 +323,29 @@ def seed_index_from_existing_files(
                     episode_matches=tuple(ep_matches),
                 )
             )
+
+    # Preserve catalog ordering from `catalog/{series,movie}/*.json` when seeding legacy trees
+    ordered_ids: list[str] = []
+    catalog_paths = sorted(
+        p
+        for p in existing_files
+        if len(p.parts) == 3
+        and p.parts[0] == "catalog"
+        and p.parts[1] in ("series", "movie")
+        and p.suffix == ".json"
+    )
+    for cp in catalog_paths:
+        try:
+            cat_data = json.loads(existing_files[cp])
+            for card in cat_data.get("metas", []):
+                if isinstance(card, dict) and isinstance(card.get("id"), str):
+                    ordered_ids.append(card["id"])
+        except Exception:
+            continue
+
+    if ordered_ids:
+        order_lookup = {sid: rank for rank, sid in enumerate(ordered_ids)}
+        items.sort(key=lambda b: order_lookup.get(b.metadata.stremio_id, len(ordered_ids)))
 
     return CatalogIndex(items=tuple(items))
 
@@ -328,6 +363,57 @@ def upsert_media_item(index: CatalogIndex, new_item: BoundMediaItem) -> CatalogI
         if item.metadata.stremio_id not in (target_id, legacy_id)
     )
     return CatalogIndex(items=(new_item, *remaining))
+
+
+def remove_media_items(
+    index: CatalogIndex,
+    query: str,
+) -> tuple[CatalogIndex, tuple[BoundMediaItem, ...]]:
+    """
+    Pure state transition: removes items matching `query` from `index`.
+
+    Matches first by exact identifier (`stremio_id`, legacy `pa_` ID, `slug`, `info_hash`,
+    magnet `btih`, or `torrent_id`). If no exact identifier matches, falls back to
+    case-insensitive substring matching on `title`, `slug`, or `stremio_id`.
+    """
+    q = query.strip().lower()
+    if not q:
+        return index, ()
+
+    btih_match = re.search(r"urn:btih:([a-f0-9]{40})", q)
+    if btih_match:
+        q = btih_match.group(1)
+
+    def _is_exact_match(item: BoundMediaItem) -> bool:
+        meta = item.metadata
+        sid = meta.stremio_id.lower()
+        return (
+            sid == q
+            or _legacy_stremio_id(sid) == q
+            or (bool(meta.slug) and meta.slug.lower() == q)
+            or item.info_hash.lower() == q
+            or (item.torrent_id > 0 and str(item.torrent_id) == q)
+        )
+
+    exact_removed = tuple(item for item in index.items if _is_exact_match(item))
+    if exact_removed:
+        remaining = tuple(item for item in index.items if not _is_exact_match(item))
+        return CatalogIndex(items=remaining), exact_removed
+
+    def _is_substring_match(item: BoundMediaItem) -> bool:
+        meta = item.metadata
+        return (
+            q in meta.title.lower()
+            or q in meta.stremio_id.lower()
+            or (bool(meta.slug) and q in meta.slug.lower())
+        )
+
+    sub_removed = tuple(item for item in index.items if _is_substring_match(item))
+    if sub_removed:
+        remaining = tuple(item for item in index.items if not _is_substring_match(item))
+        return CatalogIndex(items=remaining), sub_removed
+
+    return index, ()
 
 
 def _compile_single_item(
@@ -600,3 +686,66 @@ def compile_contraband_addon(
         json.dumps(manifest_payload, indent=2, ensure_ascii=False) + "\n"
     )
     return VirtualFS(files=files)
+
+
+def audit_contraband_addon(
+    index: CatalogIndex,
+    actual_vfs: VirtualFS,
+    *,
+    addon_config: AddonConfig = DEFAULT_ADDON_CONFIG,
+    active_hashes: set[str] | None = None,
+) -> CatalogAuditReport:
+    """
+    Pure diagnostic audit: compares `actual_vfs` against the deterministic compilation of
+    `index` and checks each `BoundMediaItem` for unlinked episode files or missing Debrid hashes.
+    """
+    expected_vfs = compile_contraband_addon(index, addon_config=addon_config)
+    managed_roots = {"catalog", "meta", "stream"}
+
+    actual_managed = {
+        p
+        for p in actual_vfs.files
+        if p in (PurePosixPath("manifest.json"), CATALOG_INDEX_PATH)
+        or (p.parts and p.parts[0] in managed_roots)
+    }
+    expected_paths = set(expected_vfs.files.keys())
+
+    orphaned = tuple(
+        sorted(p for p in actual_managed if p not in expected_paths and p.parts[0] in managed_roots)
+    )
+    missing = tuple(sorted(p for p in expected_paths if p not in actual_vfs.files))
+    stale = tuple(
+        sorted(
+            p
+            for p in (expected_paths & actual_managed)
+            if actual_vfs.files[p].rstrip("\n") != expected_vfs.files[p].rstrip("\n")
+        )
+    )
+
+    unlinked = tuple(
+        item
+        for item in index.items
+        if item.torrent_id <= 0 or not item.episode_matches
+    )
+    missing_debrid: tuple[BoundMediaItem, ...] = ()
+    if active_hashes is not None:
+        normalized_hashes = {h.lower() for h in active_hashes}
+        missing_debrid = tuple(
+            item
+            for item in index.items
+            if item.info_hash.lower() not in normalized_hashes
+        )
+
+    series_count = sum(1 for item in index.items if item.metadata.media_type == "series")
+    movie_count = sum(1 for item in index.items if item.metadata.media_type == "movie")
+
+    return CatalogAuditReport(
+        total_items=len(index.items),
+        series_count=series_count,
+        movie_count=movie_count,
+        unlinked_items=unlinked,
+        missing_on_debrid=missing_debrid,
+        orphaned_files=orphaned,
+        missing_files=missing,
+        stale_files=stale,
+    )

@@ -1,9 +1,9 @@
 {
   "id": "dev.darshanas.contraband",
-  "version": "1.3.0",
+  "version": "1.5.0",
   "name": "Contraband",
   "description": "Curated niche courses, rare lectures, and unlisted specials",
-  "logo": "https://petersonacademy.com/favicon-apple-touch-v3.png",
+  "logo": "https://placehold.co/256x256/111827/f9fafb/png?text=CB",
   "resources": [
     "catalog",
     "meta",

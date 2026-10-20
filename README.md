@@ -41,7 +41,14 @@ uv run cb watch
 # 4. List all active, completed, and queued torrents in your TorBox Cloud Library
 uv run cb list
 
-# 5. Build static Stremio metadata directly for an infoHash & publish to GitHub
+# 5. Remove a catalog item and prune its static meta/stream/catalog files
+uv run cb remove sw_pa_3215 --publish
+
+# 6. Audit static addon integrity, episode bindings, and live TorBox cloud status
+uv run cb doctor
+uv run cb doctor --fix --publish
+
+# 7. Build static Stremio metadata directly for an infoHash & publish to GitHub
 uv run cb build --hash <40-char-hash> --torrent-id <id> --collection "Stand-Up Specials" --publish
 uv run cb publish
 ```

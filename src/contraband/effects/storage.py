@@ -165,6 +165,13 @@ def materialize_virtual_fs(
                     for existing_json in list(managed_dir.rglob("*.json")):
                         if existing_json.resolve() not in expected_resolved_paths:
                             existing_json.unlink(missing_ok=True)
+                    for child_dir in sorted(
+                        (d for d in managed_dir.rglob("*") if d.is_dir()),
+                        key=lambda p: len(p.parts),
+                        reverse=True,
+                    ):
+                        if not any(child_dir.iterdir()):
+                            child_dir.rmdir()
                 case _:
                     continue
 

@@ -5,7 +5,9 @@ from pathlib import Path, PurePosixPath
 
 from contraband.cli import commit_catalog_index, load_catalog_index, resolve_bound_media_item
 from contraband.core.compiler import (
+    audit_contraband_addon,
     compile_contraband_addon,
+    remove_media_items,
     seed_index_from_existing_files,
     upsert_media_item,
 )
@@ -15,6 +17,7 @@ from contraband.core.types import (
     CatalogIndex,
     EpisodeFileMatch,
     TorrentFileEntry,
+    VirtualFS,
 )
 from contraband.effects.storage import resolve_within_directory
 from contraband.providers.metadata.fallback import build_fallback_media_metadata
@@ -218,3 +221,71 @@ def test_single_pass_batch_index_weaving_and_commit(tmp_path: Path) -> None:
 
     reloaded = load_catalog_index(tmp_path)
     assert len(reloaded.items) == 2
+
+
+def test_remove_media_items_and_audit_contraband_addon() -> None:
+    series_files = (TorrentFileEntry(index=0, name="01. Intro.mp4", size_bytes=100),)
+    movie_files = (TorrentFileEntry(index=0, name="Louis.CK.Sorry.2021.mp4", size_bytes=100),)
+    meta1 = build_fallback_media_metadata(
+        "MasterClass - Chris Voss - Negotiation",
+        series_files,
+        torrent_id=101,
+    )
+    meta2 = build_fallback_media_metadata(
+        "Louis C.K. - Sorry (2021)",
+        movie_files,
+        torrent_id=202,
+    ).with_collection("Stand-Up Specials")
+
+    bound1 = BoundMediaItem(
+        metadata=meta1,
+        info_hash="1" * 40,
+        torrent_id=101,
+        episode_matches=(EpisodeFileMatch(episode_number=1, file_index=0, filename="01. Intro.mp4"),),
+    )
+    bound2 = BoundMediaItem(
+        metadata=meta2,
+        info_hash="2" * 40,
+        torrent_id=0,
+        episode_matches=(),
+    )
+
+    idx = upsert_media_item(upsert_media_item(CatalogIndex(), bound1), bound2)
+    compiled_vfs = compile_contraband_addon(idx)
+
+    expected_stream_path = PurePosixPath(f"stream/movie/{meta2.stremio_id}.json")
+    # Inject an orphan file and remove an expected file to verify audit_contraband_addon
+    drifted_files = dict(compiled_vfs.files)
+    drifted_files[PurePosixPath("meta/series/orphan.json")] = "{}\n"
+    del drifted_files[expected_stream_path]
+
+    report = audit_contraband_addon(
+        idx,
+        VirtualFS(files=drifted_files),
+        active_hashes={"1" * 40},
+    )
+    assert report.total_items == 2
+    assert report.series_count == 1
+    assert report.movie_count == 1
+    assert len(report.unlinked_items) == 1
+    assert report.unlinked_items[0].metadata.stremio_id == bound2.metadata.stremio_id
+    assert len(report.missing_on_debrid) == 1
+    assert report.missing_on_debrid[0].info_hash == "2" * 40
+    assert PurePosixPath("meta/series/orphan.json") in report.orphaned_files
+    assert expected_stream_path in report.missing_files
+    assert report.has_fs_drift is True
+    assert report.is_healthy is False
+
+    # Remove the unlinked item by title substring and verify resulting index is healthy
+    pruned_idx, removed = remove_media_items(idx, "Louis C.K.")
+    assert len(removed) == 1
+    assert removed[0].metadata.stremio_id == bound2.metadata.stremio_id
+    assert len(pruned_idx.items) == 1
+
+    clean_vfs = compile_contraband_addon(pruned_idx)
+    healthy_report = audit_contraband_addon(
+        pruned_idx,
+        clean_vfs,
+        active_hashes={"1" * 40},
+    )
+    assert healthy_report.is_healthy is True

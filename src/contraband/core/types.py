@@ -148,6 +148,30 @@ class VirtualFS:
 
 
 @dataclass(frozen=True, slots=True)
+class CatalogAuditReport:
+    """Immutable health and consistency audit report for a Contraband static addon."""
+
+    total_items: int
+    series_count: int
+    movie_count: int
+    unlinked_items: tuple[BoundMediaItem, ...] = ()
+    missing_on_debrid: tuple[BoundMediaItem, ...] = ()
+    orphaned_files: tuple[PurePosixPath, ...] = ()
+    missing_files: tuple[PurePosixPath, ...] = ()
+    stale_files: tuple[PurePosixPath, ...] = ()
+
+    @property
+    def has_fs_drift(self) -> bool:
+        """True if any static files on disk are orphaned, missing, or out-of-sync with `CatalogIndex`."""
+        return bool(self.orphaned_files or self.missing_files or self.stale_files)
+
+    @property
+    def is_healthy(self) -> bool:
+        """True if all items are linked, present on Debrid (if checked), and static files match `CatalogIndex`."""
+        return not (self.unlinked_items or self.missing_on_debrid or self.has_fs_drift)
+
+
+@dataclass(frozen=True, slots=True)
 class TorrentFileEntry:
     """A single file entry inside a torrent or Debrid cloud item."""
 
