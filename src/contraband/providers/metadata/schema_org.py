@@ -1,7 +1,5 @@
 """Pure Schema.org JSON-LD & OpenGraph metadata parser for arbitrary web URLs (courses, specials, movies, series)."""
 
-from __future__ import annotations
-
 import hashlib
 import html
 import json

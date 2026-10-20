@@ -1,7 +1,5 @@
 """Structural `typing.Protocol` interfaces for Contraband metadata and Debrid providers."""
 
-from __future__ import annotations
-
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Protocol

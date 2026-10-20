@@ -1,7 +1,5 @@
 """Unit tests for bencode decoding, magnet parsing, and smart episode matching."""
 
-from __future__ import annotations
-
 import hashlib
 
 from contraband.core.bencode import (

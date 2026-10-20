@@ -1,7 +1,5 @@
 """Safe Git repository staging, commit, and push adapter."""
 
-from __future__ import annotations
-
 import shutil
 import subprocess
 from pathlib import Path

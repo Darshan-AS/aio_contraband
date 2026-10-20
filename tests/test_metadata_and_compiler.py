@@ -1,7 +1,5 @@
 """Unit tests for pure metadata providers, static addon compiler (series & movie), and path security."""
 
-from __future__ import annotations
-
 import json
 from pathlib import Path, PurePosixPath
 

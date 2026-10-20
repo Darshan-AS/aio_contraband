@@ -1,9 +1,9 @@
-"""Monadic Result type (`Ok[T] | Err[E]`) and pure functional combinators."""
-
-from __future__ import annotations
+"""Monadic Result type (`Ok[T] | Err[E]`) with PEP 696 default error type and pure combinators."""
 
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+
+from contraband.core.errors import StreamWeaverError
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,7 +20,7 @@ class Ok[T]:
 
 
 @dataclass(frozen=True, slots=True)
-class Err[E]:
+class Err[E = StreamWeaverError]:
     """Represents a failed computation holding an immutable domain error."""
 
     error: E
@@ -32,7 +32,7 @@ class Err[E]:
         return True
 
 
-type Result[T, E] = Ok[T] | Err[E]
+type Result[T, E = StreamWeaverError] = Ok[T] | Err[E]
 
 
 def map_result[T, E, U](result: Result[T, E], fn: Callable[[T], U]) -> Result[U, E]:

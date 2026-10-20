@@ -1,7 +1,5 @@
 """Pure Peterson Academy course metadata parser and slug/subject matcher."""
 
-from __future__ import annotations
-
 import html
 import json
 import re

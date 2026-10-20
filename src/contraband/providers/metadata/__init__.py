@@ -1,7 +1,5 @@
 """Contraband metadata provider pipeline and default provider chain."""
 
-from __future__ import annotations
-
 from collections.abc import Sequence
 
 from contraband.core.types import MediaItemMetadata, TorrentFileEntry

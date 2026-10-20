@@ -1,7 +1,5 @@
 """Contraband CLI (`cb`) — Static Stremio Addon Compiler & TorBox Cloud Ingestor."""
 
-from __future__ import annotations
-
 import re
 import sys
 import time
@@ -125,7 +123,7 @@ def weave_media_into_addon(
     allow_fallback: bool = False,
     clean_before_build: bool = False,
     addon_config: AddonConfig = DEFAULT_ADDON_CONFIG,
-) -> Result[WeaveMediaOutcome | None, StreamWeaverError]:
+) -> Result[WeaveMediaOutcome | None]:
     """Resolves metadata, matches episodes/files, updates `CatalogIndex`, and materializes `VirtualFS`."""
     effective_fallback = bool(allow_fallback or collection_override or media_type_override)
     meta = resolve_media_metadata(
@@ -268,7 +266,7 @@ def _refresh_aiostreams_cache(addon_dir: Path, http_client: HttpClientProtocol) 
 def _expand_cli_targets(
     raw_targets: Sequence[str],
     from_file: Path | None = None,
-) -> Result[tuple[tuple[str, ...], list[tuple[str, int]]], StreamWeaverError]:
+) -> Result[tuple[tuple[str, ...], list[tuple[str, int]]]]:
     expanded: list[str] = []
     file_extractions: list[tuple[str, int]] = []
 

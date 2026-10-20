@@ -1,7 +1,5 @@
 """Filesystem I/O and VirtualFS materialization for Contraband."""
 
-from __future__ import annotations
-
 import json
 import os
 import shutil

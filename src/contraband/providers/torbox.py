@@ -1,7 +1,5 @@
 """TorBox cloud debrid provider implementing `DebridProviderProtocol`."""
 
-from __future__ import annotations
-
 import uuid
 from collections.abc import Mapping
 from pathlib import Path

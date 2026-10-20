@@ -1,7 +1,5 @@
 """Zero-network fallback provider that builds structured metadata from any torrent's filenames."""
 
-from __future__ import annotations
-
 import hashlib
 import re
 from collections.abc import Mapping, Sequence

@@ -1,7 +1,5 @@
 """Pure functions for episode-to-file matching, filename cleaning, and artwork URL generation."""
 
-from __future__ import annotations
-
 import re
 import urllib.parse
 from collections.abc import Sequence
