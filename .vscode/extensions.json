@@ -3,7 +3,6 @@
     "ms-python.python",
     "ms-python.vscode-pylance",
     "charliermarsh.ruff",
-    "tamasfe.even-better-toml",
-    "mikestead.dotenv"
+    "tamasfe.even-better-toml"
   ]
 }
