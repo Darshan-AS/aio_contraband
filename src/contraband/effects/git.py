@@ -7,14 +7,38 @@ from pathlib import Path
 from contraband.core.errors import GitError
 from contraband.core.result import Err, Ok, Result
 
+MANAGED_ADDON_PATHS: tuple[str, ...] = (
+    "manifest.json",
+    "catalog_index.json",
+    "catalog",
+    "meta",
+    "stream",
+)
+
+
+def _detect_git_branch(git_bin: str, repo_dir: Path) -> str:
+    proc = subprocess.run(
+        [git_bin, "-C", str(repo_dir), "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    branch = proc.stdout.strip() if proc.returncode == 0 else ""
+    return branch if branch and branch != "HEAD" else "main"
+
 
 def publish_git_repo(
     repo_dir: Path,
     commit_message: str = "feat(catalog): Sync Contraband metadata and stream links",
+    *,
+    branch: str | None = None,
+    push: bool = True,
 ) -> Result[bool, GitError]:
     """
-    Stages, commits, and pushes changes in `repo_dir` to `origin main`.
-    Returns `Ok(True)` if changes were committed and pushed, `Ok(False)` if the working tree was clean.
+    Stages managed static Stremio addon paths (`manifest.json`, `catalog_index.json`,
+    `catalog/`, `meta/`, `stream/`), commits, and optionally pushes changes in `repo_dir`
+    to `origin <branch>`.
+    Returns `Ok(True)` if changes were committed, `Ok(False)` if managed paths were clean.
     """
     resolved_dir = repo_dir.resolve()
     if not (resolved_dir / ".git").exists():
@@ -28,7 +52,7 @@ def publish_git_repo(
 
     try:
         status_proc = subprocess.run(
-            [git_bin, "-C", str(resolved_dir), "status", "--porcelain"],
+            [git_bin, "-C", str(resolved_dir), "status", "--porcelain", "--", *MANAGED_ADDON_PATHS],
             capture_output=True,
             text=True,
             check=False,
@@ -38,8 +62,16 @@ def publish_git_repo(
         if not status_proc.stdout.strip():
             return Ok(False)
 
+        active_paths = [
+            p
+            for p in MANAGED_ADDON_PATHS
+            if (resolved_dir / p).exists() or p in status_proc.stdout
+        ]
+        if not active_paths:
+            return Ok(False)
+
         subprocess.run(
-            [git_bin, "-C", str(resolved_dir), "add", "-A"],
+            [git_bin, "-C", str(resolved_dir), "add", "-A", "--", *active_paths],
             capture_output=True,
             text=True,
             check=True,
@@ -50,12 +82,14 @@ def publish_git_repo(
             text=True,
             check=True,
         )
-        subprocess.run(
-            [git_bin, "-C", str(resolved_dir), "push", "origin", "main"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        if push:
+            target_branch = branch or _detect_git_branch(git_bin, resolved_dir)
+            subprocess.run(
+                [git_bin, "-C", str(resolved_dir), "push", "origin", target_branch],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
         return Ok(True)
     except subprocess.CalledProcessError as exc:
         stderr = (exc.stderr or "").strip()

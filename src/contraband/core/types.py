@@ -104,11 +104,12 @@ class MediaItemMetadata:
 
 @dataclass(frozen=True, slots=True)
 class EpisodeFileMatch:
-    """Maps a 1-based episode number to a Debrid file index and short filename."""
+    """Maps a 1-based episode number (and season) to a Debrid file index and short filename."""
 
     episode_number: int
     file_index: int
     filename: str
+    season: int = 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,7 +131,8 @@ class AddonConfig:
     version: str = "1.5.0"
     description: str = "Curated niche courses, rare lectures, and unlisted specials"
     logo: str = DEFAULT_CONTRABAND_LOGO
-    id_prefixes: tuple[str, ...] = ("sw_", "pa_", "aiostreams::library.torbox.torrent.")
+    id_prefixes: tuple[str, ...] = ("sw_", "pa_")
+    emit_library_meta: bool = False
 
 
 @dataclass(frozen=True, slots=True)

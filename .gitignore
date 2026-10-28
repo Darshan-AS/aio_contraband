@@ -1,4 +1,7 @@
 .env
+*magnets*.md
+*magnets*.txt
+*.torrent
 .venv/
 __pycache__/
 *.py[cod]

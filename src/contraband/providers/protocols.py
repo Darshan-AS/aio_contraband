@@ -1,6 +1,6 @@
 """Structural `typing.Protocol` interfaces for Contraband metadata and Debrid providers."""
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Protocol
 
@@ -59,6 +59,10 @@ class DebridProviderProtocol(Protocol):
     def max_active_downloads(self) -> int: ...
 
     def check_cached(self, info_hash: str) -> Result[DebridCacheStatus, NetworkError]: ...
+
+    def check_cached_bulk(
+        self, info_hashes: Sequence[str]
+    ) -> Result[Mapping[str, DebridCacheStatus], NetworkError]: ...
 
     def list_library(self) -> Result[tuple[DebridTorrentItem, ...], NetworkError]: ...
 

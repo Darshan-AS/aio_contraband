@@ -1,9 +1,18 @@
 """Unit tests for pure metadata providers, static addon compiler (series & movie), and path security."""
 
 import json
+import subprocess
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
+from typing import Any
 
-from contraband.cli import commit_catalog_index, load_catalog_index, resolve_bound_media_item
+from contraband.cli import (
+    _discover_synced_torrent_ids,
+    _refresh_aiostreams_cache,
+    commit_catalog_index,
+    load_catalog_index,
+    resolve_bound_media_item,
+)
 from contraband.core.compiler import (
     audit_contraband_addon,
     compile_contraband_addon,
@@ -11,14 +20,18 @@ from contraband.core.compiler import (
     seed_index_from_existing_files,
     upsert_media_item,
 )
-from contraband.core.result import Err, Ok
+from contraband.core.errors import NetworkError
+from contraband.core.result import Err, Ok, Result
 from contraband.core.types import (
+    AddonConfig,
     BoundMediaItem,
     CatalogIndex,
     EpisodeFileMatch,
     TorrentFileEntry,
     VirtualFS,
 )
+from contraband.effects.git import publish_git_repo
+from contraband.effects.http import HttpResponse
 from contraband.effects.storage import resolve_within_directory
 from contraband.providers.metadata.fallback import build_fallback_media_metadata
 from contraband.providers.metadata.peterson import (
@@ -27,6 +40,7 @@ from contraband.providers.metadata.peterson import (
     parse_peterson_course_html,
 )
 from contraband.providers.metadata.schema_org import parse_web_media_html
+from contraband.providers.torbox import TorBoxProvider
 
 
 def test_peterson_parser_pure_html_extraction() -> None:
@@ -128,10 +142,12 @@ def test_non_course_standup_special_movie_compilation() -> None:
     assert PurePosixPath("catalog/movie/stand_up_specials.json") in vfs.files
     assert PurePosixPath("meta/movie/sw_tb_555.json") in vfs.files
     assert PurePosixPath("stream/movie/sw_tb_555.json") in vfs.files
-    assert PurePosixPath("meta/library/aiostreams::library.torbox.torrent.555.json") in vfs.files
+    assert PurePosixPath("meta/library/aiostreams::library.torbox.torrent.555.json") not in vfs.files
 
     manifest = json.loads(vfs.files[PurePosixPath("manifest.json")])
     assert "movie" in manifest["types"]
+    assert "library" not in manifest["types"]
+    assert "aiostreams::library." not in manifest["idPrefixes"]
     assert manifest["catalogs"][0] == {
         "type": "movie",
         "id": "stand_up_specials",
@@ -166,12 +182,22 @@ def test_addon_compiler_and_seed_roundtrip() -> None:
     assert PurePosixPath("catalog_index.json") in vfs.files
     assert PurePosixPath("catalog/series/masterclass.json") in vfs.files
     assert PurePosixPath("meta/series/sw_mc_999.json") in vfs.files
-    assert PurePosixPath("meta/library/aiostreams::library.torbox.torrent.999.json") in vfs.files
+    assert PurePosixPath("meta/library/aiostreams::library.torbox.torrent.999.json") not in vfs.files
     assert PurePosixPath("stream/series/sw_mc_999_s1e1.json") in vfs.files
+
+    series_meta = json.loads(vfs.files[PurePosixPath("meta/series/sw_mc_999.json")])
+    assert series_meta["meta"]["videos"][0]["id"] == "sw_mc_999_s1e1"
+    assert series_meta["meta"]["videos"][1]["id"] == "sw_mc_999_s1e2"
 
     manifest = json.loads(vfs.files[PurePosixPath("manifest.json")])
     assert manifest["id"] == "dev.darshanas.contraband"
     assert manifest["catalogs"][0]["id"] == "masterclass"
+
+    # Opt-in emit_library_meta=True still emits legacy library metadata when explicitly requested
+    lib_vfs = compile_contraband_addon(idx, addon_config=AddonConfig(emit_library_meta=True))
+    assert PurePosixPath("meta/library/aiostreams::library.torbox.torrent.999.json") in lib_vfs.files
+    lib_manifest = json.loads(lib_vfs.files[PurePosixPath("manifest.json")])
+    assert "library" in lib_manifest["types"]
 
     # Verify seeding from legacy files without catalog_index.json
     legacy_files = {k: v for k, v in vfs.files.items() if k != PurePosixPath("catalog_index.json")}
@@ -289,3 +315,165 @@ def test_remove_media_items_and_audit_contraband_addon() -> None:
         active_hashes={"1" * 40},
     )
     assert healthy_report.is_healthy is True
+
+
+def test_multi_season_series_compilation_and_roundtrip(tmp_path: Path) -> None:
+    files = (
+        TorrentFileEntry(index=4, name="Archive.S01E01.Origins.mkv", size_bytes=1000),
+        TorrentFileEntry(index=9, name="Archive.S02E01.Expansion.mkv", size_bytes=2000),
+    )
+    bound = resolve_bound_media_item(
+        display_title="BBC - Deep History Archive",
+        info_hash="d" * 40,
+        torrent_id=777,
+        files=files,
+        fetch_html=lambda _url: None,
+        allow_fallback=True,
+    )
+    assert bound is not None
+    assert len(bound.episode_matches) == 2
+
+    idx = upsert_media_item(CatalogIndex(), bound)
+    commit_res = commit_catalog_index(tmp_path, idx)
+    assert isinstance(commit_res, Ok)
+
+    s1_stream = json.loads((tmp_path / "stream" / "series" / "sw_bbc_777_s1e1.json").read_text())
+    s2_stream = json.loads((tmp_path / "stream" / "series" / "sw_bbc_777_s2e1.json").read_text())
+    assert s1_stream["streams"][0]["fileIdx"] == 4
+    assert s2_stream["streams"][0]["fileIdx"] == 9
+
+    assert _discover_synced_torrent_ids(tmp_path) == {777}
+    reloaded = load_catalog_index(tmp_path)
+    assert [(m.season, m.episode_number, m.file_index) for m in reloaded.items[0].episode_matches] == [
+        (1, 1, 4),
+        (2, 1, 9),
+    ]
+
+
+class _FakeHttpClient:
+    def __init__(self, responses: Mapping[str, Any]) -> None:
+        self._responses = responses
+        self.calls: list[tuple[str, str]] = []
+
+    def request_json(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: Mapping[str, str] | None = None,
+        json_body: Any | None = None,
+        raw_body: bytes | None = None,
+        timeout: float = 30.0,
+    ) -> Result[HttpResponse, NetworkError]:
+        _ = headers, json_body, raw_body, timeout
+        self.calls.append((method, url))
+        payload = self._responses.get(url, {"success": True, "data": {}})
+        return Ok(HttpResponse(status_code=200, data=payload, text=""))
+
+    def fetch_html(self, url: str, *, timeout: float = 20.0) -> str | None:
+        _ = url, timeout
+        return None
+
+
+def test_torbox_check_cached_bulk_batches_single_request() -> None:
+    h1 = "a" * 40
+    h2 = "b" * 40
+    expected_url = (
+        f"https://api.torbox.app/v1/api/torrents/checkcached?hash={h1},{h2}&format=object&list_files=true"
+    )
+    fake_http = _FakeHttpClient(
+        {
+            expected_url: {
+                "success": True,
+                "data": {
+                    h1: {
+                        "size": 4096,
+                        "files": [{"id": 0, "short_name": "01.mp4", "size": 4096}],
+                    }
+                },
+            }
+        }
+    )
+    provider = TorBoxProvider(api_key="tb_test_key", http_client=fake_http)
+    res = provider.check_cached_bulk([h1, h2, h1.upper()])
+    assert isinstance(res, Ok)
+    assert len(fake_http.calls) == 1
+    assert res.value[h1].is_cached is True
+    assert res.value[h1].size_bytes == 4096
+    assert res.value[h2].is_cached is False
+
+
+def test_refresh_aiostreams_cache_injects_secret_placeholder(tmp_path: Path) -> None:
+    addon_dir = tmp_path / "aio_contraband"
+    addon_dir.mkdir()
+    mgr_dir = tmp_path / "stream-weaver" / "configs"
+    mgr_dir.mkdir(parents=True)
+    (mgr_dir / "aiomanager.json").write_text(
+        json.dumps(
+            {
+                "addons": {
+                    "savedAddons": [
+                        {
+                            "name": "AIOStreams",
+                            "installUrl": "https://streams.example.com/stremio/u1/{{SECRET_AIOSTREAMS_ENCRYPTED_PASSWORD}}/manifest.json",
+                        }
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    fake_http = _FakeHttpClient({})
+    assert _refresh_aiostreams_cache(addon_dir, fake_http, env={}) is False
+    assert fake_http.calls == []
+
+    assert (
+        _refresh_aiostreams_cache(
+            addon_dir,
+            fake_http,
+            env={"SECRET_AIOSTREAMS_ENCRYPTED_PASSWORD": "enc_secret_value"},
+        )
+        is True
+    )
+    assert fake_http.calls == [
+        (
+            "GET",
+            "https://streams.example.com/stremio/u1/enc_secret_value/stream/movie/aiostreams::library.torbox.action.refresh.json",
+        )
+    ]
+
+
+def test_publish_git_repo_stages_only_managed_paths(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", str(tmp_path)], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "config", "user.email", "test@example.com"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "config", "user.name", "Contraband Test"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Create both managed addon output and unmanaged source/scratch files
+    (tmp_path / "manifest.json").write_text('{"id":"dev.darshanas.contraband"}\n', encoding="utf-8")
+    (tmp_path / "scratch_notes.txt").write_text("do not commit me\n", encoding="utf-8")
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "wip.py").write_text("x = 1\n", encoding="utf-8")
+
+    res = publish_git_repo(tmp_path, commit_message="test: managed only", push=False)
+    assert res == Ok(True)
+
+    committed = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-tree", "-r", "--name-only", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    assert committed == ["manifest.json"]
+
+    # Second run with only unmanaged dirty files should be a no-op
+    res_noop = publish_git_repo(tmp_path, commit_message="test: noop", push=False)
+    assert res_noop == Ok(False)

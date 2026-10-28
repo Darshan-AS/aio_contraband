@@ -10,13 +10,11 @@
     "stream"
   ],
   "types": [
-    "series",
-    "library"
+    "series"
   ],
   "idPrefixes": [
     "sw_",
-    "pa_",
-    "aiostreams::library.torbox.torrent."
+    "pa_"
   ],
   "catalogs": [
     {

@@ -94,6 +94,7 @@ def build_fallback_media_metadata(
             description=f"{ep_label} {m.episode_number} — {item_title}"
             + (f" ({creator})" if creator else ""),
             thumbnail=thumb,
+            season=m.season,
         )
         for m in ep_matches
     )

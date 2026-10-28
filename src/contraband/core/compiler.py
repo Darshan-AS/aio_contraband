@@ -73,6 +73,7 @@ def serialize_catalog_index(index: CatalogIndex) -> str:
                         "episode_number": em.episode_number,
                         "file_index": em.file_index,
                         "filename": em.filename,
+                        **({"season": em.season} if em.season != 1 else {}),
                     }
                     for em in item.episode_matches
                 ],
@@ -137,6 +138,7 @@ def parse_catalog_index(raw_json: str) -> Result[CatalogIndex, ParseError]:
                 episode_number=int(em.get("episode_number", 1)),
                 file_index=int(em.get("file_index", 0)),
                 filename=str(em.get("filename", "")),
+                season=int(em.get("season", 1)),
             )
             for em in entry.get("episode_matches", [])
             if isinstance(em, dict)
@@ -295,6 +297,7 @@ def seed_index_from_existing_files(
                                     episode_number=ep_num,
                                     file_index=f_idx,
                                     filename=f_name,
+                                    season=season,
                                 )
                             )
                     except Exception:
@@ -427,7 +430,10 @@ def _compile_single_item(
     stremio_id = item_meta.stremio_id
     media_type = item_meta.media_type
     torbox_lib_id = f"aiostreams::library.torbox.torrent.{bound.torrent_id}"
-    match_by_ep = {m.episode_number: (m.file_index, m.filename) for m in bound.episode_matches}
+    match_by_se = {
+        (m.season, m.episode_number): (m.file_index, m.filename)
+        for m in bound.episode_matches
+    }
 
     display_name = (
         f"{item_meta.title} — {item_meta.creator}"
@@ -455,7 +461,7 @@ def _compile_single_item(
     stream_files: dict[PurePosixPath, JsonDict] = {}
 
     if media_type == "movie":
-        file_idx, filename = match_by_ep.get(1, (0, f"{item_meta.title}.mp4"))
+        file_idx, filename = match_by_se.get((1, 1), (0, f"{item_meta.title}.mp4"))
         stream_rel_path = PurePosixPath("stream") / "movie" / f"{stremio_id}.json"
         stream_files[stream_rel_path] = {
             "streams": [
@@ -496,14 +502,15 @@ def _compile_single_item(
         return catalog_card, meta_rel_path, meta_payload, library_meta, stream_files
 
     episodes = item_meta.episodes
-    if not episodes and match_by_ep:
+    if not episodes and match_by_se:
         episodes = tuple(
             EpisodeMetadata(
                 number=ep_num,
                 title=clean_video_stem(fname),
                 thumbnail=item_meta.episode_thumbnail,
+                season=season_num,
             )
-            for ep_num, (_, fname) in sorted(match_by_ep.items())
+            for (season_num, ep_num), (_, fname) in sorted(match_by_se.items())
         )
 
     videos_series: list[JsonDict] = []
@@ -511,8 +518,9 @@ def _compile_single_item(
 
     for ep in episodes:
         ep_num = ep.number
-        file_idx, filename = match_by_ep.get(
-            ep_num, (ep_num - 1, f"{ep_num}. {ep.title}.mp4")
+        file_idx, filename = match_by_se.get(
+            (ep.season, ep_num),
+            match_by_se.get((1, ep_num), (ep_num - 1, f"{ep_num}. {ep.title}.mp4")),
         )
         dur_mins = round(ep.duration_seconds / 60) if ep.duration_seconds else 0
         ep_thumb = ep.thumbnail or item_meta.episode_thumbnail
@@ -529,15 +537,10 @@ def _compile_single_item(
         ep_overview = f"{header}\n\n{ep.description}".strip() if header else ep.description
 
         vid_series_id = f"{stremio_id}_s{ep.season}e{ep_num}"
-        vid_playback_id = (
-            f"{torbox_lib_id}:{file_idx}"
-            if (bound.torrent_id and ep_num in match_by_ep)
-            else vid_series_id
-        )
 
         videos_series.append(
             {
-                "id": vid_playback_id,
+                "id": vid_series_id,
                 "title": f"{ep_num}. {ep.title}",
                 "season": ep.season,
                 "episode": ep_num,
@@ -609,7 +612,9 @@ def compile_contraband_addon(
     # Group cards by `(media_type, collection_id)`
     cards_by_bucket: dict[tuple[MediaType, str], list[JsonDict]] = {}
     display_by_bucket: dict[tuple[MediaType, str], str] = {}
-    active_types: set[str] = {"series", "library"}
+    active_types: set[str] = {"series"}
+    if addon_config.emit_library_meta:
+        active_types.add("library")
 
     for bound in index.items:
         card, meta_path, meta_payload, library_meta, stream_map = _compile_single_item(bound)
@@ -624,7 +629,7 @@ def compile_contraband_addon(
 
         files[meta_path] = json.dumps(meta_payload, indent=2, ensure_ascii=False) + "\n"
 
-        if library_meta is not None and bound.torrent_id:
+        if addon_config.emit_library_meta and library_meta is not None and bound.torrent_id:
             torbox_lib_id = f"aiostreams::library.torbox.torrent.{bound.torrent_id}"
             meta_lib_path = PurePosixPath("meta") / "library" / f"{torbox_lib_id}.json"
             files[meta_lib_path] = json.dumps(library_meta, indent=2, ensure_ascii=False) + "\n"
@@ -671,6 +676,13 @@ def compile_contraband_addon(
         catalogs_manifest.append(cat_entry)
 
     ordered_types = [t for t in ("series", "movie", "library") if t in active_types]
+    id_prefixes = list(addon_config.id_prefixes)
+    if (
+        addon_config.emit_library_meta
+        and "aiostreams::library.torbox.torrent." not in id_prefixes
+    ):
+        id_prefixes.append("aiostreams::library.torbox.torrent.")
+
     manifest_payload: JsonDict = {
         "id": addon_config.addon_id,
         "version": addon_config.version,
@@ -679,7 +691,7 @@ def compile_contraband_addon(
         "logo": addon_config.logo,
         "resources": ["catalog", "meta", "stream"],
         "types": ordered_types,
-        "idPrefixes": list(addon_config.id_prefixes),
+        "idPrefixes": id_prefixes,
         "catalogs": catalogs_manifest,
     }
     files[PurePosixPath("manifest.json")] = (

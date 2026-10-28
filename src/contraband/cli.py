@@ -4,7 +4,7 @@ import concurrent.futures
 import re
 import sys
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Any
@@ -35,11 +35,13 @@ from contraband.core.types import (
     AddonConfig,
     BoundMediaItem,
     CatalogIndex,
+    DebridCacheStatus,
     DebridQueuedItem,
     DebridTorrentItem,
     EpisodeFileMatch,
     MediaItemMetadata,
     MediaType,
+    ParsedTorrent,
     TorrentFileEntry,
     VirtualFS,
 )
@@ -81,12 +83,36 @@ class WeaveMediaOutcome:
     files_written: int
 
 
+_SECRET_PLACEHOLDER_RE = re.compile(r"\{\{(SECRET_[A-Z0-9_]+)\}\}")
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedAddTarget:
+    """Pre-parsed CLI target ready for bulk cache lookup and Debrid ingestion."""
+
+    info_hash: str
+    magnet_uri: str
+    display_title: str
+    dn: str | None = None
+    torrent_path: Path | None = None
+    torrent_bytes: bytes | None = None
+    parsed_torrent: ParsedTorrent | None = None
+
+
 def _resolve_context() -> tuple[Path, dict[str, str], AddonConfig]:
     addon_dir = Path(__file__).resolve().parents[2]
     env = load_env_with_fallback(addon_dir)
     if override_dir := env.get("ADDON_REPO_DIR"):
         addon_dir = Path(override_dir).expanduser()
-    addon_cfg = AddonConfig(logo=env.get("ADDON_LOGO_URL") or DEFAULT_CONTRABAND_LOGO)
+    emit_lib = env.get("ADDON_EMIT_LIBRARY_META", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    addon_cfg = AddonConfig(
+        logo=env.get("ADDON_LOGO_URL") or DEFAULT_CONTRABAND_LOGO,
+        emit_library_meta=emit_lib,
+    )
     return addon_dir, env, addon_cfg
 
 
@@ -295,30 +321,45 @@ def _maybe_publish_addon(addon_dir: Path, message: str) -> None:
             err_console.print(f"⚠️  [Contraband] Auto-publish warning: {err}")
 
 
-def _refresh_aiostreams_cache(addon_dir: Path, http_client: HttpClientProtocol) -> bool:
-    aiomanager_path = addon_dir.parent / "stream-weaver" / "configs" / "aiomanager.json"
-    if not aiomanager_path.exists():
-        return False
-    match read_json_file(aiomanager_path):
-        case Err():
-            return False
-        case Ok(mgr):
-            pass
+def _refresh_aiostreams_cache(
+    addon_dir: Path,
+    http_client: HttpClientProtocol,
+    env: Mapping[str, str] | None = None,
+) -> bool:
+    env_map = env or {}
+    install_url = env_map.get("AIOSTREAMS_INSTALL_URL", "").strip().rstrip("/")
 
-    install_url = ""
-    addons_sec = mgr.get("addons")
-    if isinstance(addons_sec, dict) and isinstance(addons_sec.get("savedAddons"), list):
-        for sa in addons_sec["savedAddons"]:
-            if not isinstance(sa, dict):
-                continue
-            raw_mf = sa.get("manifest")
-            mf: dict[str, Any] = raw_mf if isinstance(raw_mf, dict) else {}
-            if sa.get("name") == "AIOStreams" or str(mf.get("id", "")).startswith("aiostreams"):
-                install_url = str(sa.get("installUrl", "")).rstrip("/")
-                break
+    if not install_url:
+        aiomanager_path = addon_dir.parent / "stream-weaver" / "configs" / "aiomanager.json"
+        if not aiomanager_path.exists():
+            return False
+        match read_json_file(aiomanager_path):
+            case Err():
+                return False
+            case Ok(mgr):
+                pass
+
+        addons_sec = mgr.get("addons")
+        if isinstance(addons_sec, dict) and isinstance(addons_sec.get("savedAddons"), list):
+            for sa in addons_sec["savedAddons"]:
+                if not isinstance(sa, dict):
+                    continue
+                raw_mf = sa.get("manifest")
+                mf: dict[str, Any] = raw_mf if isinstance(raw_mf, dict) else {}
+                if sa.get("name") == "AIOStreams" or str(mf.get("id", "")).startswith("aiostreams"):
+                    install_url = str(sa.get("installUrl", "")).rstrip("/")
+                    break
 
     if not install_url:
         return False
+
+    install_url = _SECRET_PLACEHOLDER_RE.sub(
+        lambda m: env_map.get(m.group(1)) or m.group(0),
+        install_url,
+    )
+    if "{{SECRET_" in install_url:
+        return False
+
     if install_url.endswith("/manifest.json"):
         install_url = install_url[: -len("/manifest.json")]
 
@@ -383,14 +424,12 @@ def _promote_queued_slots(
 
 
 def _discover_synced_torrent_ids(addon_dir: Path) -> set[int]:
-    synced_ids: set[int] = set()
-    lib_meta_dir = addon_dir / "meta" / "library"
-    if lib_meta_dir.exists():
-        for p in lib_meta_dir.rglob("aiostreams::library.torbox.torrent.*.json"):
-            m = re.search(r"\.(\d+)\.json$", p.name)
-            if m:
-                synced_ids.add(int(m.group(1)))
-    return synced_ids
+    idx = load_catalog_index(addon_dir)
+    return {
+        item.torrent_id
+        for item in idx.items
+        if item.torrent_id > 0 and item.episode_matches
+    }
 
 
 # ============================================================================
@@ -607,7 +646,7 @@ def cmd_watch(
 
             if active_count == 0 and not remaining_q:
                 _maybe_publish_addon(addon_dir, "feat(catalog): Finalize Contraband queue sync")
-                if _refresh_aiostreams_cache(addon_dir, http_client):
+                if _refresh_aiostreams_cache(addon_dir, http_client, env=env):
                     console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
                 console.print("\n🎉 All queued TorBox downloads have finished and published to Contraband!")
                 return
@@ -692,13 +731,9 @@ def cmd_add(
                 if qitem.info_hash:
                     queued_by_hash[qitem.info_hash] = qitem
 
-        catalog_index = load_catalog_index(addon_dir)
-        index_dirty = False
-        added_any = False
-        cached_count = 0
-        queued_count = 0
-        failed_count = 0
-
+        prepared_items: list[
+            tuple[str, Path | None, Result[_PreparedAddTarget, ContrabandError]]
+        ] = []
         for idx, raw_target in enumerate(expanded_targets, start=1):
             prefix_label = f"[{idx}/{len(expanded_targets)}] " if len(expanded_targets) > 1 else ""
             t_path: Path | None = None
@@ -710,19 +745,84 @@ def cmd_add(
                 except OSError:
                     t_path = None
 
-            dn: str | None = None
+            if t_path is not None:
+                raw_bytes = t_path.read_bytes()
+                match parse_torrent_bytes(raw_bytes, fallback_name=t_path.stem):
+                    case Err(bencode_err):
+                        prepared_items.append((prefix_label, t_path, Err(bencode_err)))
+                    case Ok(parsed_t):
+                        prepared_items.append(
+                            (
+                                prefix_label,
+                                t_path,
+                                Ok(
+                                    _PreparedAddTarget(
+                                        info_hash=parsed_t.info_hash,
+                                        magnet_uri=parsed_t.magnet_uri,
+                                        display_title=name or parsed_t.name,
+                                        dn=parsed_t.name,
+                                        torrent_path=t_path,
+                                        torrent_bytes=raw_bytes,
+                                        parsed_torrent=parsed_t,
+                                    )
+                                ),
+                            )
+                        )
+            else:
+                match parse_magnet_uri(raw_target):
+                    case Err(mag_err):
+                        prepared_items.append((prefix_label, None, Err(mag_err)))
+                    case Ok(mag):
+                        prepared_items.append(
+                            (
+                                prefix_label,
+                                None,
+                                Ok(
+                                    _PreparedAddTarget(
+                                        info_hash=mag.info_hash,
+                                        magnet_uri=mag.magnet_uri,
+                                        display_title=name or mag.display_name or mag.info_hash,
+                                        dn=mag.display_name,
+                                    )
+                                ),
+                            )
+                        )
+
+        hashes_to_check = [
+            prep.value.info_hash.lower()
+            for _, _, prep in prepared_items
+            if isinstance(prep, Ok)
+            and prep.value.info_hash.lower() not in library_by_hash
+            and prep.value.info_hash.lower() not in queued_by_hash
+        ]
+        bulk_cache: Mapping[str, DebridCacheStatus] = {}
+        if hashes_to_check and isinstance(
+            bulk_res := debrid.check_cached_bulk(hashes_to_check), Ok
+        ):
+            bulk_cache = bulk_res.value
+
+        catalog_index = load_catalog_index(addon_dir)
+        index_dirty = False
+        added_any = False
+        cached_count = 0
+        queued_count = 0
+        failed_count = 0
+
+        for prefix_label, t_path, prep_res in prepared_items:
             if t_path is not None:
                 console.print(f"\n📦 {prefix_label}Inspecting .torrent file: {t_path.name}")
-                match parse_torrent_bytes(t_path.read_bytes(), fallback_name=t_path.stem):
-                    case Err(err):
-                        err_console.print(f"❌ {err}")
-                        failed_count += 1
-                        continue
-                    case Ok(parsed_t):
-                        info_hash = parsed_t.info_hash
-                        display_title = name or parsed_t.name
-                        magnet_uri = parsed_t.magnet_uri
-                        dn = parsed_t.name
+            match prep_res:
+                case Err(err):
+                    err_console.print(f"❌ {err}")
+                    failed_count += 1
+                    continue
+                case Ok(target_item):
+                    info_hash = target_item.info_hash
+                    magnet_uri = target_item.magnet_uri
+                    dn = target_item.dn
+                    display_title = target_item.display_title
+                    if target_item.parsed_torrent is not None:
+                        parsed_t = target_item.parsed_torrent
                         console.print(f"   • Name:       {parsed_t.name}")
                         console.print(f"   • InfoHash:   {info_hash}")
                         console.print(
@@ -732,17 +832,7 @@ def cmd_add(
                             console.print(
                                 f"   ⚠️  Warning: Torrent size ({format_bytes(parsed_t.total_bytes)}) exceeds the 200 GB Essential plan limit!"
                             )
-            else:
-                match parse_magnet_uri(raw_target):
-                    case Err(err):
-                        err_console.print(f"❌ {err}")
-                        failed_count += 1
-                        continue
-                    case Ok(mag):
-                        info_hash = mag.info_hash
-                        magnet_uri = mag.magnet_uri
-                        dn = mag.display_name
-                        display_title = name or dn or info_hash
+                    else:
                         console.print(f"\n🧲 {prefix_label}Inspecting magnet: {display_title}")
                         console.print(f"   • InfoHash:   {info_hash}")
 
@@ -798,9 +888,9 @@ def cmd_add(
                 continue
 
             is_cached = False
-            if isinstance(cache_res := debrid.check_cached(info_hash), Ok) and cache_res.value.is_cached:
+            c_info = bulk_cache.get(ih_lower)
+            if c_info is not None and c_info.is_cached:
                 is_cached = True
-                c_info = cache_res.value
                 console.print(
                     f"   • Status:     ⚡ INSTANTLY CACHED on TorBox ({format_bytes(c_info.size_bytes)}, {len(c_info.files)} files)"
                 )
@@ -814,8 +904,12 @@ def cmd_add(
                 should_queue = active_downloads >= debrid.max_active_downloads
 
             add_res = (
-                debrid.add_torrent_file(t_path, t_path.read_bytes(), as_queued=should_queue)
-                if t_path is not None
+                debrid.add_torrent_file(
+                    target_item.torrent_path,
+                    target_item.torrent_bytes,
+                    as_queued=should_queue,
+                )
+                if target_item.torrent_path is not None and target_item.torrent_bytes is not None
                 else debrid.add_magnet(magnet_uri, name=name or dn, as_queued=should_queue)
             )
 
@@ -872,7 +966,7 @@ def cmd_add(
 
         if added_any:
             _maybe_publish_addon(addon_dir, "feat(catalog): Add new Contraband metadata and stream links")
-            if _refresh_aiostreams_cache(addon_dir, http_client):
+            if _refresh_aiostreams_cache(addon_dir, http_client, env=env):
                 console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
             console.print("\n🎬 Done! Open Nuvio or Stremio on Home to watch.")
             return

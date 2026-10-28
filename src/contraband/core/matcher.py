@@ -6,9 +6,17 @@ from collections.abc import Sequence
 
 from contraband.core.types import EpisodeFileMatch, EpisodeMetadata, TorrentFileEntry
 
+SEASON_EPISODE_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"(?<![a-zA-Z0-9])s0*(\d+)\s*e0*(\d+)(?![a-zA-Z0-9])", re.IGNORECASE),
+    re.compile(
+        r"(?<![a-zA-Z0-9])module\s*0*(\d+)\s*[-_.:]\s*0*(\d+)(?![a-zA-Z0-9])",
+        re.IGNORECASE,
+    ),
+)
+
 EPISODE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        r"(?:s\d+e|ep?\s*|lecture\s*|lesson\s*|part\s*|chapter\s*|module\s*\d+\s*[-_.]\s*)0*(\d+)\b",
+        r"(?<![a-zA-Z0-9])(?:ep?\s*|lecture\s*|lesson\s*|part\s*|chapter\s*)0*(\d+)(?![a-zA-Z0-9])",
         re.IGNORECASE,
     ),
     re.compile(r"^\s*0*(\d+)[\.\s_:\-]"),
@@ -53,15 +61,27 @@ def clean_video_stem(filename: str) -> str:
     return cleaned or base
 
 
-def extract_episode_number_from_filename(short_name: str) -> int | None:
-    """Extracts a 1-based episode number from common series/course naming patterns."""
+def extract_season_and_episode_from_filename(short_name: str) -> tuple[int, int] | None:
+    """Extracts a 1-based `(season, episode)` pair from series/course naming patterns."""
+    for se_pat in SEASON_EPISODE_PATTERNS:
+        m = se_pat.search(short_name)
+        if m:
+            season_num, ep_num = int(m.group(1)), int(m.group(2))
+            if season_num > 0 and ep_num > 0:
+                return season_num, ep_num
     for pat in EPISODE_PATTERNS:
         m = pat.search(short_name)
         if m:
             num = int(m.group(1))
             if num > 0:
-                return num
+                return 1, num
     return None
+
+
+def extract_episode_number_from_filename(short_name: str) -> int | None:
+    """Extracts a 1-based episode number from common series/course naming patterns."""
+    extracted = extract_season_and_episode_from_filename(short_name)
+    return extracted[1] if extracted is not None else None
 
 
 def match_files_to_episodes(
@@ -69,28 +89,31 @@ def match_files_to_episodes(
     episodes: Sequence[EpisodeMetadata],
 ) -> tuple[EpisodeFileMatch, ...]:
     """
-    Purely matches video files to 1-based episode numbers using:
-      1. Explicit episode/part/lecture numbering in filenames (`01.`, `S01E01`, `Part 1`, `Lecture 1`)
+    Purely matches video files to 1-based `(season, episode)` keys using:
+      1. Explicit season/episode/part/lecture numbering in filenames (`01.`, `S01E01`, `Part 1`, `Lecture 1`)
       2. Fuzzy token similarity against known `EpisodeMetadata` titles
       3. Lexicographical fallback when files are unnumbered
     """
-    by_episode: dict[int, EpisodeFileMatch] = {}
+    by_key: dict[tuple[int, int], EpisodeFileMatch] = {}
     video_files = [f for f in files if f.is_video]
 
     for vf in video_files:
-        ep_num = extract_episode_number_from_filename(vf.short_name)
-        if ep_num is not None and ep_num not in by_episode:
-            by_episode[ep_num] = EpisodeFileMatch(
+        se = extract_season_and_episode_from_filename(vf.short_name)
+        if se is not None and se not in by_key:
+            season_num, ep_num = se
+            by_key[se] = EpisodeFileMatch(
                 episode_number=ep_num,
                 file_index=vf.index,
                 filename=vf.short_name,
+                season=season_num,
             )
 
     # Fuzzy title fallback for unnumbered files when episode titles are known
-    if len(by_episode) < len(episodes) and video_files:
-        used_indices = {m.file_index for m in by_episode.values()}
+    if len(by_key) < len(episodes) and video_files:
+        used_indices = {m.file_index for m in by_key.values()}
         for ep in episodes:
-            if ep.number in by_episode:
+            key = (ep.season, ep.number)
+            if key in by_key:
                 continue
             ep_tokens = set(WORD_TOKEN_RE.findall(ep.title.lower()))
             if not ep_tokens:
@@ -106,20 +129,22 @@ def match_files_to_episodes(
                     best_score = score
                     best_vf = vf
             if best_vf is not None and best_score > 0:
-                by_episode[ep.number] = EpisodeFileMatch(
+                by_key[key] = EpisodeFileMatch(
                     episode_number=ep.number,
                     file_index=best_vf.index,
                     filename=best_vf.short_name,
+                    season=ep.season,
                 )
                 used_indices.add(best_vf.index)
 
-    if not by_episode and video_files:
+    if not by_key and video_files:
         sorted_videos = sorted(video_files, key=lambda item: item.short_name)
         for ep_num, vf in enumerate(sorted_videos, start=1):
-            by_episode[ep_num] = EpisodeFileMatch(
+            by_key[(1, ep_num)] = EpisodeFileMatch(
                 episode_number=ep_num,
                 file_index=vf.index,
                 filename=vf.short_name,
+                season=1,
             )
 
-    return tuple(by_episode[k] for k in sorted(by_episode))
+    return tuple(by_key[k] for k in sorted(by_key))

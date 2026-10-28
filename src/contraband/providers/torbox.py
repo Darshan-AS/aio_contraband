@@ -1,7 +1,7 @@
 """TorBox cloud debrid provider implementing `DebridProviderProtocol`."""
 
 import uuid
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -141,29 +141,59 @@ class TorBoxProvider:
             case Ok(resp):
                 return Ok((resp.status_code, resp.data))
 
+    def check_cached_bulk(
+        self, info_hashes: Sequence[str]
+    ) -> Result[Mapping[str, DebridCacheStatus], NetworkError]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for raw in info_hashes:
+            ih = raw.strip().lower()
+            if ih and ih not in seen:
+                seen.add(ih)
+                normalized.append(ih)
+
+        if not normalized:
+            return Ok({})
+
+        results: dict[str, DebridCacheStatus] = {
+            ih: DebridCacheStatus(info_hash=ih, is_cached=False) for ih in normalized
+        }
+
+        chunk_size = 100
+        for start in range(0, len(normalized), chunk_size):
+            chunk = normalized[start : start + chunk_size]
+            hash_csv = ",".join(chunk)
+            match self._request(
+                "GET",
+                f"/torrents/checkcached?hash={hash_csv}&format=object&list_files=true",
+            ):
+                case Err() as err:
+                    return err
+                case Ok((status, data)):
+                    if status == 200 and isinstance(data, dict):
+                        inner = data.get("data")
+                        if isinstance(inner, dict):
+                            for ih in chunk:
+                                hit = inner.get(ih) or inner.get(ih.upper())
+                                if isinstance(hit, dict):
+                                    results[ih] = DebridCacheStatus(
+                                        info_hash=ih,
+                                        is_cached=True,
+                                        size_bytes=int(hit.get("size") or 0),
+                                        files=parse_torbox_files(hit.get("files")),
+                                    )
+
+        return Ok(results)
+
     def check_cached(self, info_hash: str) -> Result[DebridCacheStatus, NetworkError]:
-        ih = info_hash.lower()
-        match self._request(
-            "GET",
-            f"/torrents/checkcached?hash={ih}&format=object&list_files=true",
-        ):
+        ih = info_hash.strip().lower()
+        match self.check_cached_bulk((ih,)):
             case Err() as err:
                 return err
-            case Ok((status, data)):
-                if status == 200 and isinstance(data, dict):
-                    inner = data.get("data")
-                    if isinstance(inner, dict):
-                        hit = inner.get(ih) or inner.get(ih.upper())
-                        if isinstance(hit, dict):
-                            return Ok(
-                                DebridCacheStatus(
-                                    info_hash=ih,
-                                    is_cached=True,
-                                    size_bytes=int(hit.get("size") or 0),
-                                    files=parse_torbox_files(hit.get("files")),
-                                )
-                            )
-                return Ok(DebridCacheStatus(info_hash=ih, is_cached=False))
+            case Ok(mapping):
+                return Ok(
+                    mapping.get(ih) or DebridCacheStatus(info_hash=ih, is_cached=False)
+                )
 
     def list_library(self) -> Result[tuple[DebridTorrentItem, ...], NetworkError]:
         match self._request("GET", "/torrents/mylist?bypass_cache=true&limit=1000"):

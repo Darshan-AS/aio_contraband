@@ -10,6 +10,7 @@ from contraband.core.bencode import (
 from contraband.core.matcher import (
     clean_video_stem,
     extract_episode_number_from_filename,
+    extract_season_and_episode_from_filename,
     format_bytes,
     match_files_to_episodes,
 )
@@ -51,6 +52,9 @@ def test_parse_magnet_and_extract_from_markdown() -> None:
 def test_episode_matching_numbered_and_fuzzy() -> None:
     assert extract_episode_number_from_filename("03. The Republic.mp4") == 3
     assert extract_episode_number_from_filename("Lecture 07 - Aristotle.mkv") == 7
+    assert extract_season_and_episode_from_filename("Show.S02E05.1080p.mkv") == (2, 5)
+    assert extract_season_and_episode_from_filename("Show_S03E09_WEB-DL.mp4") == (3, 9)
+    assert extract_season_and_episode_from_filename("Module 3 - 02 Intro.mp4") == (3, 2)
     assert clean_video_stem("03. The_Republic.mp4") == "The Republic"
     assert format_bytes(2 * (1024**3)) == "2.00 GB"
 
@@ -68,3 +72,12 @@ def test_episode_matching_numbered_and_fuzzy() -> None:
     assert matches[0].file_index == 10
     assert matches[1].episode_number == 2
     assert matches[1].file_index == 11
+
+    multi_season_files = (
+        TorrentFileEntry(index=0, name="Archive.S01E01.Pilot.mkv", size_bytes=100),
+        TorrentFileEntry(index=1, name="Archive.S02E01.Return.mkv", size_bytes=100),
+    )
+    ms_matches = match_files_to_episodes(multi_season_files, ())
+    assert len(ms_matches) == 2
+    assert (ms_matches[0].season, ms_matches[0].episode_number, ms_matches[0].file_index) == (1, 1, 0)
+    assert (ms_matches[1].season, ms_matches[1].episode_number, ms_matches[1].file_index) == (2, 1, 1)
