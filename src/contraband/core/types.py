@@ -1,5 +1,7 @@
 """Immutable domain data structures and PEP 742 TypeIs narrowing guards for Contraband."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import PurePosixPath

@@ -1,6 +1,7 @@
 """Contraband CLI (`cb`) — Static Stremio Addon Compiler & TorBox Cloud Ingestor."""
 
 import concurrent.futures
+import os
 import re
 import sys
 import time
@@ -48,6 +49,7 @@ from contraband.core.types import (
 from contraband.effects.git import publish_git_repo
 from contraband.effects.http import HttpClientProtocol, HttpxClient
 from contraband.effects.storage import (
+    load_addon_config,
     load_env_with_fallback,
     materialize_virtual_fs,
     read_addon_virtual_fs,
@@ -85,6 +87,24 @@ class WeaveMediaOutcome:
 
 _SECRET_PLACEHOLDER_RE = re.compile(r"\{\{(SECRET_[A-Z0-9_]+)\}\}")
 
+AddonDirOption = Annotated[
+    Path | None,
+    typer.Option(
+        "--dir",
+        "-C",
+        help="Addon workspace directory (defaults to ADDON_REPO_DIR, current directory if initialized, or package root).",
+    ),
+]
+
+_ACTIVE_ADDON_DIR: Path | None = None
+
+
+@app.callback()
+def _main_callback(addon_dir: AddonDirOption = None) -> None:
+    """Configure global CLI options for Contraband."""
+    global _ACTIVE_ADDON_DIR
+    _ACTIVE_ADDON_DIR = addon_dir
+
 
 @dataclass(frozen=True, slots=True)
 class _PreparedAddTarget:
@@ -99,21 +119,62 @@ class _PreparedAddTarget:
     parsed_torrent: ParsedTorrent | None = None
 
 
-def _resolve_context() -> tuple[Path, dict[str, str], AddonConfig]:
-    addon_dir = Path(__file__).resolve().parents[2]
+def resolve_addon_dir(
+    explicit_dir: Path | None = None,
+    *,
+    cwd: Path | None = None,
+    env: Mapping[str, str] | None = None,
+    package_root: Path | None = None,
+) -> Path:
+    """
+    Resolves the active Contraband static addon directory with priority:
+    1. Explicit `--dir` / `-C` CLI flag (`explicit_dir` or global callback)
+    2. `ADDON_REPO_DIR` environment variable
+    3. `cwd` if it contains `addon.toml` or `catalog_index.json`
+    4. Fallback to `package_root` (`Path(__file__).resolve().parents[2]`)
+    """
+    chosen = explicit_dir if explicit_dir is not None else _ACTIVE_ADDON_DIR
+    if chosen is not None:
+        return chosen.expanduser().resolve()
+
+    env_lookup = env if env is not None else os.environ
+    if env_dir := env_lookup.get("ADDON_REPO_DIR", "").strip():
+        return Path(env_dir).expanduser().resolve()
+
+    effective_cwd = (cwd if cwd is not None else Path.cwd()).resolve()
+    if (effective_cwd / "addon.toml").is_file() or (
+        effective_cwd / "catalog_index.json"
+    ).is_file():
+        return effective_cwd
+
+    fallback_root = (
+        package_root.resolve()
+        if package_root is not None
+        else Path(__file__).resolve().parents[2]
+    )
+    return fallback_root
+
+
+def _resolve_context(
+    explicit_dir: Path | None = None,
+) -> tuple[Path, dict[str, str], AddonConfig]:
+    addon_dir = resolve_addon_dir(explicit_dir)
     env = load_env_with_fallback(addon_dir)
-    if override_dir := env.get("ADDON_REPO_DIR"):
-        addon_dir = Path(override_dir).expanduser()
-    emit_lib = env.get("ADDON_EMIT_LIBRARY_META", "").strip().lower() in (
-        "1",
-        "true",
-        "yes",
-    )
-    addon_cfg = AddonConfig(
-        logo=env.get("ADDON_LOGO_URL") or DEFAULT_CONTRABAND_LOGO,
-        emit_library_meta=emit_lib,
-    )
-    return addon_dir, env, addon_cfg
+    if (
+        explicit_dir is None
+        and _ACTIVE_ADDON_DIR is None
+        and not os.environ.get("ADDON_REPO_DIR", "").strip()
+        and (override_dir := env.get("ADDON_REPO_DIR", "").strip())
+    ):
+        addon_dir = Path(override_dir).expanduser().resolve()
+        env = load_env_with_fallback(addon_dir)
+
+    match load_addon_config(addon_dir, env):
+        case Err(err):
+            err_console.print(f"❌ {err}")
+            raise typer.Exit(code=1)
+        case Ok(addon_cfg):
+            return addon_dir, env, addon_cfg
 
 
 def _parse_media_type_option(raw_type: str | None) -> MediaType | None:
@@ -433,14 +494,112 @@ def _discover_synced_torrent_ids(addon_dir: Path) -> set[int]:
 
 
 # ============================================================================
-# CLI Commands (`cb list`, `cb sync`, `cb watch`, `cb add`, `cb build`, `cb publish`)
+# CLI Commands (`cb init`, `cb list`, `cb sync`, `cb watch`, `cb add`, `cb build`, `cb publish`)
 # ============================================================================
+
+_INIT_ENV_EXAMPLE = """# Contraband Static Addon Environment
+DEBRID_PROVIDER=torbox
+SECRET_TORBOX_API_KEY=
+SECRET_RD_API_KEY=
+AIOSTREAMS_INSTALL_URL=
+"""
+
+_INIT_GITIGNORE = """.env
+.DS_Store
+__pycache__/
+.venv/
+"""
+
+
+@app.command("init")
+def cmd_init(
+    target_dir: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Target directory to initialize as a Contraband static addon workspace (defaults to --dir or current directory)."
+        ),
+    ] = None,
+    addon_id: Annotated[
+        str,
+        typer.Option("--id", help="Reverse-DNS Stremio addon ID"),
+    ] = "org.community.contraband",
+    addon_name: Annotated[
+        str,
+        typer.Option("--name", help="Display name of your static Stremio addon"),
+    ] = "My Contraband",
+    description: Annotated[
+        str,
+        typer.Option("--description", help="Short Stremio manifest description"),
+    ] = "Curated niche courses, rare lectures, and unlisted specials",
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Overwrite existing scaffold files (never overwrites .env)"),
+    ] = False,
+    workspace_dir: AddonDirOption = None,
+) -> None:
+    """Scaffold a standalone Contraband static Stremio addon workspace (`addon.toml`, `.env.example`, `manifest.json`)."""
+    dest = (
+        target_dir
+        if target_dir is not None
+        else (workspace_dir if workspace_dir is not None else (_ACTIVE_ADDON_DIR or Path.cwd()))
+    ).expanduser().resolve()
+    dest.mkdir(parents=True, exist_ok=True)
+
+    escaped_id = addon_id.replace('"', '\\"').strip() or "org.community.contraband"
+    escaped_name = addon_name.replace('"', '\\"').strip() or "My Contraband"
+    escaped_desc = description.replace('"', '\\"').strip()
+    addon_toml_content = (
+        "[addon]\n"
+        f'id = "{escaped_id}"\n'
+        f'name = "{escaped_name}"\n'
+        'version = "0.1.0"\n'
+        f'description = "{escaped_desc}"\n'
+        f'logo = "{DEFAULT_CONTRABAND_LOGO}"\n'
+        'id_prefixes = ["sw_"]\n'
+        "emit_library_meta = false\n"
+    )
+
+    created_files: list[str] = []
+    for fname, content in (
+        ("addon.toml", addon_toml_content),
+        (".env.example", _INIT_ENV_EXAMPLE),
+        (".gitignore", _INIT_GITIGNORE),
+    ):
+        fpath = dest / fname
+        if not fpath.exists() or force:
+            fpath.write_text(content, encoding="utf-8")
+            created_files.append(fname)
+
+    env = load_env_with_fallback(dest)
+    match load_addon_config(dest, env):
+        case Err(err):
+            err_console.print(f"❌ {err}")
+            raise typer.Exit(code=1)
+        case Ok(addon_cfg):
+            pass
+
+    existing_index = load_catalog_index(dest)
+    match commit_catalog_index(dest, existing_index, addon_config=addon_cfg):
+        case Err(commit_err):
+            err_console.print(f"❌ {commit_err}")
+            raise typer.Exit(code=1)
+        case Ok(written):
+            if written > 0:
+                created_files.extend(["manifest.json", "catalog_index.json"])
+
+    console.print(f"✨ Initialized Contraband workspace in {dest}")
+    if created_files:
+        console.print(f"   • Scaffolded: {', '.join(dict.fromkeys(created_files))}")
+    if (dest / ".env").exists():
+        console.print("   • Preserved existing .env")
 
 
 @app.command("list")
-def cmd_list() -> None:
+def cmd_list(
+    workspace_dir: AddonDirOption = None,
+) -> None:
     """List all active, completed, and queued torrents in your TorBox Cloud Library."""
-    _, env, _ = _resolve_context()
+    _, env, _ = _resolve_context(workspace_dir)
     with HttpxClient() as http_client:
         debrid = _require_torbox_provider(env, http_client)
         with console.status("⏳ Fetching TorBox Cloud Library & Queue in parallel..."):
@@ -507,9 +666,10 @@ def cmd_sync(
         bool,
         typer.Option("--weave", help="Force weaving structured Contraband metadata for all finished downloads"),
     ] = False,
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Scan TorBox Cloud Library, weave Contraband metadata for finished downloads, and promote queued slots."""
-    addon_dir, env, addon_cfg = _resolve_context()
+    addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     with HttpxClient() as http_client:
         debrid = _require_torbox_provider(env, http_client)
         with console.status("⏳ Scanning TorBox Cloud Library & Queue in parallel..."):
@@ -583,9 +743,10 @@ def cmd_watch(
         int,
         typer.Option("--max-active", help="Maximum concurrent downloads to keep active"),
     ] = 3,
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Continuously drain the TorBox queue, keeping parallel slots active and publishing finished items."""
-    addon_dir, env, addon_cfg = _resolve_context()
+    addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     with HttpxClient() as http_client:
         debrid = _require_torbox_provider(env, http_client, max_active=max_active)
 
@@ -692,9 +853,10 @@ def cmd_add(
         bool,
         typer.Option("--weave", help="Force weaving structured Contraband metadata from filenames"),
     ] = False,
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Add magnet links, .md lists, or .torrent files to TorBox and weave Contraband metadata."""
-    addon_dir, env, addon_cfg = _resolve_context()
+    addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     resolved_mtype = _parse_media_type_option(media_type)
 
     match _expand_cli_targets(targets or [], from_file=from_file):
@@ -1012,9 +1174,10 @@ def cmd_build(
         bool,
         typer.Option("--publish", help="Commit and push addon repo changes to GitHub"),
     ] = False,
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Build static Stremio metadata for Contraband (courses, specials, documentaries, series, or movies)."""
-    addon_dir, env, addon_cfg = _resolve_context()
+    addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     resolved_mtype = _parse_media_type_option(media_type)
 
     with HttpxClient() as http_client:
@@ -1074,9 +1237,10 @@ def cmd_remove(
         bool,
         typer.Option("--publish", help="Commit and push addon repo changes to GitHub after removal"),
     ] = False,
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Remove a media item from the Contraband catalog and prune its static meta/stream/catalog files."""
-    addon_dir, _, addon_cfg = _resolve_context()
+    addon_dir, _, addon_cfg = _resolve_context(workspace_dir)
     current_index = load_catalog_index(addon_dir)
     updated_index, removed_items = remove_media_items(current_index, target)
 
@@ -1119,9 +1283,10 @@ def cmd_doctor(
         bool,
         typer.Option("--publish", help="Commit and push repaired addon files to GitHub (with --fix)"),
     ] = False,
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Audit Contraband static addon integrity, episode bindings, and live TorBox cloud status."""
-    addon_dir, env, addon_cfg = _resolve_context()
+    addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     actual_vfs = read_addon_virtual_fs(addon_dir)
     catalog_index = seed_index_from_existing_files(actual_vfs.files)
 
@@ -1239,9 +1404,10 @@ def cmd_publish(
         str,
         typer.Option("--message", "-m", help="Commit message for Contraband addon repository"),
     ] = "feat(catalog): Sync Contraband metadata and stream links",
+    workspace_dir: AddonDirOption = None,
 ) -> None:
     """Commit and push any pending Contraband static addon changes to GitHub."""
-    addon_dir, _, _ = _resolve_context()
+    addon_dir, _, _ = _resolve_context(workspace_dir)
     match publish_git_repo(addon_dir, commit_message=message):
         case Ok(True):
             console.print(f"🚀 [Contraband] Published updated addon files in {addon_dir.name} to GitHub!")

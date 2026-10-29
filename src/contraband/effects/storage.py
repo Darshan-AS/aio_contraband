@@ -3,12 +3,19 @@
 import json
 import os
 import shutil
+import tomllib
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 from contraband.core.errors import StorageError
 from contraband.core.result import Err, Ok, Result
-from contraband.core.types import JsonDict, VirtualFS
+from contraband.core.types import (
+    DEFAULT_CONTRABAND_LOGO,
+    AddonConfig,
+    JsonDict,
+    VirtualFS,
+)
 
 
 def resolve_within_directory(
@@ -83,9 +90,102 @@ def load_env_with_fallback(addon_root: Path) -> dict[str, str]:
                 continue
 
     for k, v in os.environ.items():
-        if k.startswith(("SECRET_", "ADDON_", "AIO")):
+        if k.startswith(("SECRET_", "ADDON_", "AIO", "DEBRID_")):
             merged[k] = v
     return merged
+
+
+def _parse_bool_flag(raw: str) -> bool | None:
+    cleaned = raw.strip().lower()
+    if cleaned in ("1", "true", "yes", "on"):
+        return True
+    if cleaned in ("0", "false", "no", "off"):
+        return False
+    return None
+
+
+def load_addon_config(
+    addon_dir: Path,
+    env: Mapping[str, str] | None = None,
+) -> Result[AddonConfig, StorageError]:
+    """
+    Loads `AddonConfig` from an optional `addon.toml` file in `addon_dir`,
+    overlaid with `ADDON_*` environment variables, falling back cleanly to
+    `AddonConfig()` defaults when `addon.toml` is absent.
+    """
+    env_map = env or {}
+    defaults = AddonConfig()
+    addon_id = defaults.addon_id
+    name = defaults.name
+    version = defaults.version
+    description = defaults.description
+    logo = defaults.logo
+    id_prefixes = defaults.id_prefixes
+    emit_library_meta = defaults.emit_library_meta
+
+    toml_path = addon_dir / "addon.toml"
+    if toml_path.is_file():
+        try:
+            parsed_toml = tomllib.loads(toml_path.read_text(encoding="utf-8"))
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            return Err(
+                StorageError(
+                    message=f"Failed to parse addon.toml at {toml_path}: {exc}",
+                    path=str(toml_path),
+                )
+            )
+        raw_section = parsed_toml.get("addon")
+        section: Mapping[str, Any] = (
+            raw_section if isinstance(raw_section, Mapping) else parsed_toml
+        )
+        raw_id = section.get("id") or section.get("addon_id")
+        if isinstance(raw_id, str) and raw_id.strip():
+            addon_id = raw_id.strip()
+        if isinstance(raw_name := section.get("name"), str) and raw_name.strip():
+            name = raw_name.strip()
+        if isinstance(raw_ver := section.get("version"), str) and raw_ver.strip():
+            version = raw_ver.strip()
+        if isinstance(raw_desc := section.get("description"), str) and raw_desc.strip():
+            description = raw_desc.strip()
+        if isinstance(raw_logo := section.get("logo"), str) and raw_logo.strip():
+            logo = raw_logo.strip()
+        if isinstance(raw_prefixes := section.get("id_prefixes"), list):
+            cleaned_prefixes = tuple(
+                str(p).strip() for p in raw_prefixes if str(p).strip()
+            )
+            if cleaned_prefixes:
+                id_prefixes = cleaned_prefixes
+        if isinstance(raw_emit := section.get("emit_library_meta"), bool):
+            emit_library_meta = raw_emit
+
+    if env_id := env_map.get("ADDON_ID", "").strip():
+        addon_id = env_id
+    if env_name := env_map.get("ADDON_NAME", "").strip():
+        name = env_name
+    if env_ver := env_map.get("ADDON_VERSION", "").strip():
+        version = env_ver
+    if env_desc := env_map.get("ADDON_DESCRIPTION", "").strip():
+        description = env_desc
+    if env_logo := env_map.get("ADDON_LOGO_URL", "").strip():
+        logo = env_logo
+    if env_prefixes := env_map.get("ADDON_ID_PREFIXES", "").strip():
+        parsed_prefixes = tuple(p.strip() for p in env_prefixes.split(",") if p.strip())
+        if parsed_prefixes:
+            id_prefixes = parsed_prefixes
+    if (env_emit := _parse_bool_flag(env_map.get("ADDON_EMIT_LIBRARY_META", ""))) is not None:
+        emit_library_meta = env_emit
+
+    return Ok(
+        AddonConfig(
+            addon_id=addon_id,
+            name=name,
+            version=version,
+            description=description,
+            logo=logo or DEFAULT_CONTRABAND_LOGO,
+            id_prefixes=id_prefixes,
+            emit_library_meta=emit_library_meta,
+        )
+    )
 
 
 def read_json_file(path: Path) -> Result[JsonDict, StorageError]:
