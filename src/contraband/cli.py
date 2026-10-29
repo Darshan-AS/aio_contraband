@@ -61,6 +61,7 @@ from contraband.providers.protocols import (
     HtmlFetcher,
     MetadataProviderProtocol,
 )
+from contraband.providers.realdebrid import RealDebridProvider
 from contraband.providers.torbox import MAX_ESSENTIAL_BYTES, TorBoxProvider
 
 app = typer.Typer(
@@ -90,6 +91,14 @@ AddonDirOption = Annotated[
         "--dir",
         "-C",
         help="Addon workspace directory (defaults to ADDON_REPO_DIR, current directory if initialized, or package root).",
+    ),
+]
+
+DebridProviderOption = Annotated[
+    str | None,
+    typer.Option(
+        "--debrid",
+        help="Cloud Debrid provider: auto, torbox, or realdebrid (defaults to DEBRID_PROVIDER in .env).",
     ),
 ]
 
@@ -184,17 +193,70 @@ def _parse_media_type_option(raw_type: str | None) -> MediaType | None:
     raise typer.Exit(code=1)
 
 
-def _require_torbox_provider(
-    env: dict[str, str],
-    http_client: HttpxClient,
+def _try_optional_debrid_provider(
+    env: Mapping[str, str],
+    http_client: HttpClientProtocol,
     *,
+    provider_name: str | None = None,
     max_active: int = 3,
-) -> TorBoxProvider:
-    api_key = env.get("SECRET_TORBOX_API_KEY", "")
-    if not api_key:
-        err_console.print("❌ Error: SECRET_TORBOX_API_KEY is missing in .env")
+) -> DebridProviderProtocol | None:
+    """Resolves a configured `DebridProviderProtocol` if credentials exist, or `None`."""
+    raw_choice = (provider_name or env.get("DEBRID_PROVIDER") or "auto").strip().lower()
+    if raw_choice in ("", "auto"):
+        if tb_key := env.get("SECRET_TORBOX_API_KEY", "").strip():
+            return TorBoxProvider(api_key=tb_key, http_client=http_client, max_active=max_active)
+        if rd_key := env.get("SECRET_RD_API_KEY", "").strip():
+            return RealDebridProvider(
+                api_key=rd_key, http_client=http_client, max_active=max_active
+            )
+        return None
+
+    if raw_choice == "torbox":
+        tb_key = env.get("SECRET_TORBOX_API_KEY", "").strip()
+        return (
+            TorBoxProvider(api_key=tb_key, http_client=http_client, max_active=max_active)
+            if tb_key
+            else None
+        )
+    if raw_choice in ("realdebrid", "real-debrid", "rd"):
+        rd_key = env.get("SECRET_RD_API_KEY", "").strip()
+        return (
+            RealDebridProvider(api_key=rd_key, http_client=http_client, max_active=max_active)
+            if rd_key
+            else None
+        )
+    return None
+
+
+def _resolve_debrid_provider(
+    env: Mapping[str, str],
+    http_client: HttpClientProtocol,
+    *,
+    provider_name: str | None = None,
+    max_active: int = 3,
+) -> DebridProviderProtocol:
+    raw_choice = (provider_name or env.get("DEBRID_PROVIDER") or "auto").strip().lower()
+    if raw_choice not in ("", "auto", "torbox", "realdebrid", "real-debrid", "rd"):
+        err_console.print(
+            f"❌ Invalid --debrid provider '{raw_choice}'. Choose from: auto, torbox, realdebrid"
+        )
         raise typer.Exit(code=1)
-    return TorBoxProvider(api_key=api_key, http_client=http_client, max_active=max_active)
+
+    resolved = _try_optional_debrid_provider(
+        env, http_client, provider_name=raw_choice, max_active=max_active
+    )
+    if resolved is not None:
+        return resolved
+
+    if raw_choice in ("realdebrid", "real-debrid", "rd"):
+        err_console.print("❌ Error: SECRET_RD_API_KEY is missing in .env")
+    elif raw_choice == "torbox":
+        err_console.print("❌ Error: SECRET_TORBOX_API_KEY is missing in .env")
+    else:
+        err_console.print(
+            "❌ Error: No Debrid API key found in .env (set SECRET_TORBOX_API_KEY or SECRET_RD_API_KEY, or pass --offline)"
+        )
+    raise typer.Exit(code=1)
 
 
 def _fetch_library_and_queue_parallel(
@@ -421,7 +483,8 @@ def _refresh_aiostreams_cache(
     if install_url.endswith("/manifest.json"):
         install_url = install_url[: -len("/manifest.json")]
 
-    refresh_url = f"{install_url}/stream/movie/aiostreams::library.torbox.action.refresh.json"
+    svc_slug = "realdebrid" if env_map.get("DEBRID_PROVIDER", "").strip().lower() in ("realdebrid", "real-debrid", "rd") else "torbox"
+    refresh_url = f"{install_url}/stream/movie/aiostreams::library.{svc_slug}.action.refresh.json"
     return isinstance(http_client.request_json("GET", refresh_url, timeout=15.0), Ok)
 
 
@@ -593,13 +656,14 @@ def cmd_init(
 
 @app.command("list")
 def cmd_list(
+    debrid_provider: DebridProviderOption = None,
     workspace_dir: AddonDirOption = None,
 ) -> None:
-    """List all active, completed, and queued torrents in your TorBox Cloud Library."""
+    """List all active, completed, and queued torrents in your Debrid Cloud Library."""
     _, env, _ = _resolve_context(workspace_dir)
     with HttpxClient() as http_client:
-        debrid = _require_torbox_provider(env, http_client)
-        with console.status("⏳ Fetching TorBox Cloud Library & Queue in parallel..."):
+        debrid = _resolve_debrid_provider(env, http_client, provider_name=debrid_provider)
+        with console.status(f"⏳ Fetching {debrid.name} Cloud Library & Queue in parallel..."):
             lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
 
         match q_res:
@@ -663,13 +727,14 @@ def cmd_sync(
         bool,
         typer.Option("--weave", help="Force weaving structured Contraband metadata for all finished downloads"),
     ] = False,
+    debrid_provider: DebridProviderOption = None,
     workspace_dir: AddonDirOption = None,
 ) -> None:
-    """Scan TorBox Cloud Library, weave Contraband metadata for finished downloads, and promote queued slots."""
+    """Scan Debrid Cloud Library, weave Contraband metadata for finished downloads, and promote queued slots."""
     addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     with HttpxClient() as http_client:
-        debrid = _require_torbox_provider(env, http_client)
-        with console.status("⏳ Scanning TorBox Cloud Library & Queue in parallel..."):
+        debrid = _resolve_debrid_provider(env, http_client, provider_name=debrid_provider)
+        with console.status(f"⏳ Scanning {debrid.name} Cloud Library & Queue in parallel..."):
             lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
 
         match lib_res:
@@ -740,16 +805,19 @@ def cmd_watch(
         int,
         typer.Option("--max-active", help="Maximum concurrent downloads to keep active"),
     ] = 3,
+    debrid_provider: DebridProviderOption = None,
     workspace_dir: AddonDirOption = None,
 ) -> None:
-    """Continuously drain the TorBox queue, keeping parallel slots active and publishing finished items."""
+    """Continuously drain the Debrid queue, keeping parallel slots active and publishing finished items."""
     addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     with HttpxClient() as http_client:
-        debrid = _require_torbox_provider(env, http_client, max_active=max_active)
+        debrid = _resolve_debrid_provider(
+            env, http_client, provider_name=debrid_provider, max_active=max_active
+        )
 
         synced_ids = _discover_synced_torrent_ids(addon_dir)
         console.print(
-            f"👀 Watching TorBox Queue — keeping {max_active} parallel slots active & auto-syncing finished downloads..."
+            f"👀 Watching {debrid.name} Queue — keeping {max_active} parallel slots active & auto-syncing finished downloads..."
         )
 
         while True:
@@ -854,11 +922,24 @@ def cmd_add(
         bool,
         typer.Option("--weave", help="Force weaving structured Contraband metadata from filenames"),
     ] = False,
+    offline: Annotated[
+        bool,
+        typer.Option(
+            "--offline",
+            help="Weave static Stremio catalog/meta/stream files directly from .torrent/magnet without any Debrid API calls",
+        ),
+    ] = False,
+    publish: Annotated[
+        bool | None,
+        typer.Option("--publish/--no-publish", help="Auto-publish updated addon files to Git (default: enabled when online, disabled when --offline)"),
+    ] = None,
+    debrid_provider: DebridProviderOption = None,
     workspace_dir: AddonDirOption = None,
 ) -> None:
-    """Add magnet links, .md lists, or .torrent files to TorBox and weave Contraband metadata."""
+    """Add magnet links, .md lists, or .torrent files to Debrid (or weave locally with --offline)."""
     addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     resolved_mtype = _parse_media_type_option(media_type)
+    should_publish = (not offline) if publish is None else publish
     if meta_file is not None:
         resolved_meta_path = meta_file.expanduser().resolve()
         if not resolved_meta_path.is_file():
@@ -879,26 +960,31 @@ def cmd_add(
         raise typer.Exit(code=1)
 
     with HttpxClient() as http_client:
-        debrid = _require_torbox_provider(env, http_client)
+        debrid: DebridProviderProtocol | None = (
+            None
+            if offline
+            else _resolve_debrid_provider(env, http_client, provider_name=debrid_provider)
+        )
 
         library_by_hash: dict[str, DebridTorrentItem] = {}
         queued_by_hash: dict[str, DebridQueuedItem] = {}
         active_downloads = 0
 
-        with console.status("⏳ Checking TorBox Cloud Library & Queue in parallel..."):
-            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
+        if debrid is not None:
+            with console.status(f"⏳ Checking {debrid.name} Cloud Library & Queue in parallel..."):
+                lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
 
-        if isinstance(lib_res, Ok):
-            for item in lib_res.value:
-                if item.info_hash:
-                    library_by_hash[item.info_hash] = item
-                if not item.download_finished:
-                    active_downloads += 1
+            if isinstance(lib_res, Ok):
+                for item in lib_res.value:
+                    if item.info_hash:
+                        library_by_hash[item.info_hash] = item
+                    if not item.download_finished:
+                        active_downloads += 1
 
-        if isinstance(q_res, Ok):
-            for qitem in q_res.value:
-                if qitem.info_hash:
-                    queued_by_hash[qitem.info_hash] = qitem
+            if isinstance(q_res, Ok):
+                for qitem in q_res.value:
+                    if qitem.info_hash:
+                        queued_by_hash[qitem.info_hash] = qitem
 
         prepared_items: list[
             tuple[str, Path | None, Result[_PreparedAddTarget, ContrabandError]]
@@ -965,8 +1051,10 @@ def cmd_add(
             and prep.value.info_hash.lower() not in queued_by_hash
         ]
         bulk_cache: Mapping[str, DebridCacheStatus] = {}
-        if hashes_to_check and isinstance(
-            bulk_res := debrid.check_cached_bulk(hashes_to_check), Ok
+        if (
+            debrid is not None
+            and hashes_to_check
+            and isinstance(bulk_res := debrid.check_cached_bulk(hashes_to_check), Ok)
         ):
             bulk_cache = bulk_res.value
 
@@ -1005,16 +1093,45 @@ def cmd_add(
                         console.print(f"\n🧲 {prefix_label}Inspecting magnet: {display_title}")
                         console.print(f"   • InfoHash:   {info_hash}")
 
+            if debrid is None:
+                offline_files = (
+                    target_item.parsed_torrent.files
+                    if target_item.parsed_torrent is not None
+                    else ()
+                )
+                console.print("   • Mode:       📴 Offline static weaving (no Debrid API calls)")
+                catalog_index, woven = _weave_into_index_and_log(
+                    index=catalog_index,
+                    display_title=display_title,
+                    info_hash=info_hash,
+                    torrent_id=0,
+                    files=offline_files,
+                    addon_dir=addon_dir,
+                    http_client=http_client,
+                    url=url,
+                    slug=slug,
+                    collection=collection,
+                    media_type=resolved_mtype,
+                    allow_fallback=True,
+                )
+                index_dirty = index_dirty or woven
+                added_any = added_any or woven
+                if woven:
+                    cached_count += 1
+                else:
+                    failed_count += 1
+                continue
+
             ih_lower = info_hash.lower()
             if ih_lower in library_by_hash:
                 lib_item = library_by_hash[ih_lower]
                 if lib_item.download_finished:
                     cached_count += 1
-                    console.print(f"   • Status:     ⚡ Already in TorBox Library & Ready (ID: {lib_item.id})")
+                    console.print(f"   • Status:     ⚡ Already in {debrid.name} Library & Ready (ID: {lib_item.id})")
                 else:
                     queued_count += 1
                     console.print(
-                        f"   • Status:     ⏳ Actively Downloading on TorBox ({lib_item.progress * 100:.1f}%, ID: {lib_item.id})"
+                        f"   • Status:     ⏳ Actively Downloading on {debrid.name} ({lib_item.progress * 100:.1f}%, ID: {lib_item.id})"
                     )
                 catalog_index, woven = _weave_into_index_and_log(
                     index=catalog_index,
@@ -1037,7 +1154,7 @@ def cmd_add(
             if ih_lower in queued_by_hash:
                 q_item = queued_by_hash[ih_lower]
                 queued_count += 1
-                console.print(f"   • Status:     ⏳ Already Queued on TorBox (Queue ID: {q_item.id})")
+                console.print(f"   • Status:     ⏳ Already Queued on {debrid.name} (Queue ID: {q_item.id})")
                 catalog_index, woven = _weave_into_index_and_log(
                     index=catalog_index,
                     display_title=display_title,
@@ -1061,7 +1178,7 @@ def cmd_add(
             if c_info is not None and c_info.is_cached:
                 is_cached = True
                 console.print(
-                    f"   • Status:     ⚡ INSTANTLY CACHED on TorBox ({format_bytes(c_info.size_bytes)}, {len(c_info.files)} files)"
+                    f"   • Status:     ⚡ INSTANTLY CACHED on {debrid.name} ({format_bytes(c_info.size_bytes)}, {len(c_info.files)} files)"
                 )
                 if c_info.size_bytes > MAX_ESSENTIAL_BYTES:
                     console.print(
@@ -1069,7 +1186,7 @@ def cmd_add(
                     )
                 should_queue = False
             else:
-                console.print("   • Status:     ⏳ Uncached (TorBox will queue & download it in the cloud)")
+                console.print(f"   • Status:     ⏳ Uncached ({debrid.name} will queue & download it in the cloud)")
                 should_queue = active_downloads >= debrid.max_active_downloads
 
             add_res = (
@@ -1085,9 +1202,10 @@ def cmd_add(
             match add_res:
                 case Err(err):
                     failed_count += 1
-                    err_console.print(f"   ❌ [TorBox] {err}")
+                    err_console.print(f"   ❌ [{debrid.name}] {err}")
                 case Ok(add_outcome):
-                    if is_cached or add_outcome.was_cached:
+                    effectively_cached = is_cached or add_outcome.was_cached
+                    if effectively_cached:
                         cached_count += 1
                     else:
                         queued_count += 1
@@ -1095,14 +1213,20 @@ def cmd_add(
                             active_downloads += 1
                     id_display = add_outcome.torrent_id or add_outcome.queued_id
                     console.print(
-                        f"   ✅ [TorBox] {add_outcome.detail}"
+                        f"   ✅ [{debrid.name}] {add_outcome.detail}"
                         + (f" (ID: {id_display})" if id_display else "")
                     )
 
-                    real_tid = add_outcome.torrent_id if (add_outcome.torrent_id and is_cached) else 0
+                    real_tid = (
+                        add_outcome.torrent_id
+                        if (add_outcome.torrent_id and effectively_cached)
+                        else 0
+                    )
                     fetched_files: tuple[TorrentFileEntry, ...] = ()
                     if real_tid and isinstance(f_res := debrid.fetch_torrent_files(real_tid), Ok):
                         fetched_files = f_res.value
+                    if not fetched_files and target_item.parsed_torrent is not None and effectively_cached:
+                        fetched_files = target_item.parsed_torrent.files
 
                     catalog_index, woven = _weave_into_index_and_log(
                         index=catalog_index,
@@ -1129,14 +1253,16 @@ def cmd_add(
             raise typer.Exit(code=1)
 
         if len(expanded_targets) > 1:
+            provider_lbl = debrid.name if debrid is not None else "offline"
             console.print(
-                f"\n📊 Batch Summary: {cached_count} instantly cached, {queued_count} queued on TorBox, {failed_count} failed."
+                f"\n📊 Batch Summary: {cached_count} ready, {queued_count} queued ({provider_lbl}), {failed_count} failed."
             )
 
         if added_any:
-            _maybe_publish_addon(addon_dir, "feat(catalog): Add new Contraband metadata and stream links")
-            if _refresh_aiostreams_cache(addon_dir, http_client, env=env):
-                console.print("🔄 [AIOStreams] Refreshed TorBox Cloud Library cache — ready in Nuvio!")
+            if should_publish:
+                _maybe_publish_addon(addon_dir, "feat(catalog): Add new Contraband metadata and stream links")
+            if debrid is not None and _refresh_aiostreams_cache(addon_dir, http_client, env=env):
+                console.print(f"🔄 [AIOStreams] Refreshed {debrid.name} Cloud Library cache — ready in Nuvio!")
             console.print("\n🎬 Done! Open Nuvio or Stremio on Home to watch.")
             return
 
@@ -1147,8 +1273,12 @@ def cmd_add(
 def cmd_build(
     info_hash: Annotated[
         str,
-        typer.Option("--hash", help="40-char torrent infoHash"),
-    ],
+        typer.Option("--hash", help="40-char torrent infoHash (optional when --torrent is provided)"),
+    ] = "",
+    torrent_file: Annotated[
+        Path | None,
+        typer.Option("--torrent", help="Local .torrent file to extract infoHash and 0-based file indices offline"),
+    ] = None,
     title: Annotated[
         str,
         typer.Option("--title", help="Torrent or media display title"),
@@ -1175,7 +1305,7 @@ def cmd_build(
     ] = "auto",
     torrent_id: Annotated[
         int,
-        typer.Option("--torrent-id", help="TorBox torrent ID"),
+        typer.Option("--torrent-id", help="Debrid torrent ID"),
     ] = 0,
     clean: Annotated[
         bool,
@@ -1185,6 +1315,7 @@ def cmd_build(
         bool,
         typer.Option("--publish", help="Commit and push addon repo changes to GitHub"),
     ] = False,
+    debrid_provider: DebridProviderOption = None,
     workspace_dir: AddonDirOption = None,
 ) -> None:
     """Build static Stremio metadata for Contraband (courses, specials, documentaries, series, or movies)."""
@@ -1197,18 +1328,44 @@ def cmd_build(
             raise typer.Exit(code=1)
         url = str(resolved_meta_path)
 
+    tb_files: tuple[TorrentFileEntry, ...] = ()
+    effective_hash = info_hash.strip()
+    effective_title = title.strip()
+
+    if torrent_file is not None:
+        resolved_tpath = torrent_file.expanduser().resolve()
+        if not resolved_tpath.is_file():
+            err_console.print(f"❌ Torrent file not found: {resolved_tpath}")
+            raise typer.Exit(code=1)
+        match parse_torrent_bytes(resolved_tpath.read_bytes(), fallback_name=resolved_tpath.stem):
+            case Err(bencode_err):
+                err_console.print(f"❌ {bencode_err}")
+                raise typer.Exit(code=1)
+            case Ok(parsed_t):
+                tb_files = parsed_t.files
+                if not effective_hash:
+                    effective_hash = parsed_t.info_hash
+                if not effective_title:
+                    effective_title = parsed_t.name
+
+    if not effective_hash:
+        err_console.print("❌ Must provide either --hash <infoHash> or --torrent <file.torrent>.")
+        raise typer.Exit(code=1)
+
     with HttpxClient() as http_client:
-        api_key = env.get("SECRET_TORBOX_API_KEY", "")
-        tb_files: tuple[TorrentFileEntry, ...] = ()
-        if torrent_id and api_key:
-            debrid = TorBoxProvider(api_key=api_key, http_client=http_client)
-            if isinstance(f_res := debrid.fetch_torrent_files(torrent_id), Ok):
+        if torrent_id and not tb_files:
+            debrid = _try_optional_debrid_provider(
+                env, http_client, provider_name=debrid_provider
+            )
+            if debrid is not None and isinstance(
+                f_res := debrid.fetch_torrent_files(torrent_id), Ok
+            ):
                 tb_files = f_res.value
 
-        display_title = title or slug or url or info_hash
+        display_title = effective_title or slug or url or effective_hash
         build_res = weave_media_into_addon(
             display_title=display_title,
-            info_hash=info_hash,
+            info_hash=effective_hash,
             torrent_id=torrent_id,
             files=tb_files,
             addon_dir=addon_dir,
@@ -1294,35 +1451,38 @@ def cmd_doctor(
     ] = False,
     offline: Annotated[
         bool,
-        typer.Option("--offline", help="Skip live TorBox library/queue cross-check"),
+        typer.Option("--offline", help="Skip live Debrid library/queue cross-check"),
     ] = False,
     publish: Annotated[
         bool,
         typer.Option("--publish", help="Commit and push repaired addon files to GitHub (with --fix)"),
     ] = False,
+    debrid_provider: DebridProviderOption = None,
     workspace_dir: AddonDirOption = None,
 ) -> None:
-    """Audit Contraband static addon integrity, episode bindings, and live TorBox cloud status."""
+    """Audit Contraband static addon integrity, episode bindings, and live Debrid cloud status."""
     addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     actual_vfs = read_addon_virtual_fs(addon_dir)
     catalog_index = seed_index_from_existing_files(actual_vfs.files)
 
     active_hashes: set[str] | None = None
-    api_key = env.get("SECRET_TORBOX_API_KEY", "")
-    if not offline and api_key:
-        with (
-            HttpxClient() as http_client,
-            console.status("⏳ Cross-checking TorBox Cloud Library & Queue in parallel..."),
-        ):
-            debrid = TorBoxProvider(api_key=api_key, http_client=http_client)
-            lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
-            if isinstance(lib_res, Ok):
-                hashes: set[str] = {
-                    item.info_hash.lower() for item in lib_res.value if item.info_hash
-                }
-                if isinstance(q_res, Ok):
-                    hashes.update(q.info_hash.lower() for q in q_res.value if q.info_hash)
-                active_hashes = hashes
+    if not offline:
+        with HttpxClient() as http_client:
+            debrid = _try_optional_debrid_provider(
+                env, http_client, provider_name=debrid_provider
+            )
+            if debrid is not None:
+                with console.status(
+                    f"⏳ Cross-checking {debrid.name} Cloud Library & Queue in parallel..."
+                ):
+                    lib_res, q_res = _fetch_library_and_queue_parallel(debrid)
+                    if isinstance(lib_res, Ok):
+                        hashes: set[str] = {
+                            item.info_hash.lower() for item in lib_res.value if item.info_hash
+                        }
+                        if isinstance(q_res, Ok):
+                            hashes.update(q.info_hash.lower() for q in q_res.value if q.info_hash)
+                        active_hashes = hashes
 
     report = audit_contraband_addon(
         catalog_index,
