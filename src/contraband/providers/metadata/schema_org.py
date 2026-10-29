@@ -1,11 +1,10 @@
-"""Pure Schema.org JSON-LD & OpenGraph metadata parser for arbitrary web URLs (courses, specials, movies, series)."""
+"""Pure Schema.org JSON-LD & OpenGraph metadata parser using stdlib `html.parser`."""
 
 import hashlib
-import html
 import json
-import re
 import urllib.parse
 from collections.abc import Mapping, Sequence
+from html.parser import HTMLParser
 
 from contraband.core.matcher import build_typographic_artwork
 from contraband.core.types import (
@@ -38,24 +37,54 @@ MOVIE_SCHEMA_TYPES: frozenset[str] = frozenset(
     {"Movie", "VideoObject", "ComedyEvent", "MusicEvent", "TVSpecial", "CreativeWork"}
 )
 
-JSON_LD_SCRIPT_RE = re.compile(
-    r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
-    re.DOTALL | re.IGNORECASE,
-)
 
+class _HeadAndJsonLdParser(HTMLParser):
+    """Stdlib DOM-tokenizing extractor for `<meta>`, `<title>`, and `<script type="application/ld+json">`."""
 
-def _extract_meta_tag(raw_html: str, prop: str) -> str:
-    escaped = re.escape(prop)
-    m = re.search(
-        rf'<meta\s+(?:property|name)=["\']{escaped}["\']\s+content=["\']([^"\']+)["\']',
-        raw_html,
-        re.IGNORECASE,
-    ) or re.search(
-        rf'<meta\s+content=["\']([^"\']+)["\']\s+(?:property|name)=["\']{escaped}["\']',
-        raw_html,
-        re.IGNORECASE,
-    )
-    return html.unescape(m.group(1).strip()) if m else ""
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.meta_tags: dict[str, str] = {}
+        self.json_ld_blocks: list[str] = []
+        self.page_title: str = ""
+        self._in_json_ld = False
+        self._in_title = False
+        self._buf: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        lower_tag = tag.lower()
+        attr_map = {k.lower(): (v or "") for k, v in attrs}
+        if lower_tag == "meta":
+            content = attr_map.get("content", "").strip()
+            if content:
+                for key_attr in ("property", "name", "itemprop"):
+                    key_val = attr_map.get(key_attr, "").strip().lower()
+                    if key_val and key_val not in self.meta_tags:
+                        self.meta_tags[key_val] = content
+        elif lower_tag == "script":
+            script_type = attr_map.get("type", "").split(";", 1)[0].strip().lower()
+            if script_type == "application/ld+json":
+                self._in_json_ld = True
+                self._buf = []
+        elif lower_tag == "title" and not self.page_title:
+            self._in_title = True
+            self._buf = []
+
+    def handle_endtag(self, tag: str) -> None:
+        lower_tag = tag.lower()
+        if lower_tag == "script" and self._in_json_ld:
+            self._in_json_ld = False
+            block = "".join(self._buf).strip()
+            if block:
+                self.json_ld_blocks.append(block)
+            self._buf = []
+        elif lower_tag == "title" and self._in_title:
+            self._in_title = False
+            self.page_title = " ".join("".join(self._buf).split()).strip()
+            self._buf = []
+
+    def handle_data(self, data: str) -> None:
+        if self._in_json_ld or self._in_title:
+            self._buf.append(data)
 
 
 def parse_web_media_html(
@@ -75,14 +104,26 @@ def parse_web_media_html(
         host, ("Contraband", "web", None)
     )
 
-    title = _extract_meta_tag(raw_html, "og:title") or fallback_title or url
-    description = _extract_meta_tag(raw_html, "og:description") or _extract_meta_tag(
-        raw_html, "description"
+    parser = _HeadAndJsonLdParser()
+    parser.feed(raw_html)
+    parser.close()
+
+    meta_map = parser.meta_tags
+    title = (
+        meta_map.get("og:title")
+        or meta_map.get("twitter:title")
+        or parser.page_title
+        or fallback_title
+        or url
     )
-    image = _extract_meta_tag(raw_html, "og:image") or _extract_meta_tag(
-        raw_html, "twitter:image"
+    description = (
+        meta_map.get("og:description")
+        or meta_map.get("twitter:description")
+        or meta_map.get("description")
+        or ""
     )
-    site_name = _extract_meta_tag(raw_html, "og:site_name")
+    image = meta_map.get("og:image") or meta_map.get("twitter:image") or ""
+    site_name = meta_map.get("og:site_name") or ""
     if collection_name == "Contraband" and site_name:
         collection_name = site_name
 
@@ -91,10 +132,10 @@ def parse_web_media_html(
     detected_schema_type = ""
     extra_genres: list[str] = []
 
-    for ld_match in JSON_LD_SCRIPT_RE.finditer(raw_html):
+    for raw_block in parser.json_ld_blocks:
         try:
-            data = json.loads(ld_match.group(1).strip())
-        except Exception:
+            data = json.loads(raw_block)
+        except ValueError:
             continue
         items = (
             data
@@ -104,9 +145,16 @@ def parse_web_media_html(
         for obj in items:
             if not isinstance(obj, dict):
                 continue
-            otype = str(obj.get("@type", ""))
-            if otype in SERIES_SCHEMA_TYPES or otype in MOVIE_SCHEMA_TYPES:
-                detected_schema_type = otype
+            raw_type = obj.get("@type", "")
+            type_candidates = (
+                [str(t) for t in raw_type] if isinstance(raw_type, list) else [str(raw_type)]
+            )
+            matched_type = next(
+                (t for t in type_candidates if t in SERIES_SCHEMA_TYPES or t in MOVIE_SCHEMA_TYPES),
+                "",
+            )
+            if matched_type:
+                detected_schema_type = matched_type
                 title = str(obj.get("name") or title)
                 description = str(obj.get("description") or description)
                 raw_creator = (
@@ -116,10 +164,16 @@ def parse_web_media_html(
                     or obj.get("author")
                     or obj.get("creator")
                 )
-                if isinstance(raw_creator, dict):
+                if isinstance(raw_creator, str) and raw_creator.strip():
+                    creator = raw_creator.strip()
+                elif isinstance(raw_creator, dict):
                     creator = str(raw_creator.get("name", ""))
-                elif isinstance(raw_creator, list) and raw_creator and isinstance(raw_creator[0], dict):
-                    creator = str(raw_creator[0].get("name", ""))
+                elif isinstance(raw_creator, list) and raw_creator:
+                    first_creator = raw_creator[0]
+                    if isinstance(first_creator, dict):
+                        creator = str(first_creator.get("name", ""))
+                    elif isinstance(first_creator, str):
+                        creator = first_creator.strip()
 
                 raw_genre = obj.get("genre")
                 if isinstance(raw_genre, str) and raw_genre:
@@ -136,12 +190,19 @@ def parse_web_media_html(
                 )
                 if isinstance(parts, list):
                     for idx, part in enumerate(parts, start=1):
-                        if isinstance(part, dict) and part.get("name"):
+                        if not isinstance(part, dict):
+                            continue
+                        part_item = (
+                            part.get("item")
+                            if isinstance(part.get("item"), dict) and not part.get("name")
+                            else part
+                        )
+                        if isinstance(part_item, dict) and part_item.get("name"):
                             episodes.append(
                                 EpisodeMetadata(
                                     number=idx,
-                                    title=str(part["name"]),
-                                    description=str(part.get("description", "")),
+                                    title=str(part_item["name"]),
+                                    description=str(part_item.get("description", "")),
                                     thumbnail=image,
                                 )
                             )

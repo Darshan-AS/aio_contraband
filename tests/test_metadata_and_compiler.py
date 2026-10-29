@@ -33,6 +33,11 @@ from contraband.core.types import (
 from contraband.effects.git import publish_git_repo
 from contraband.effects.http import HttpResponse
 from contraband.effects.storage import resolve_within_directory
+from contraband.providers.metadata import (
+    discover_plugin_metadata_providers,
+    resolve_media_metadata,
+)
+from contraband.providers.metadata.archive_org import parse_archive_org_metadata_json
 from contraband.providers.metadata.fallback import build_fallback_media_metadata
 from contraband.providers.metadata.peterson import (
     infer_peterson_slug_and_subject,
@@ -40,6 +45,7 @@ from contraband.providers.metadata.peterson import (
     parse_peterson_course_html,
 )
 from contraband.providers.metadata.schema_org import parse_web_media_html
+from contraband.providers.metadata.sidecar import parse_sidecar_metadata
 from contraband.providers.torbox import TorBoxProvider
 
 
@@ -477,3 +483,194 @@ def test_publish_git_repo_stages_only_managed_paths(tmp_path: Path) -> None:
     # Second run with only unmanaged dirty files should be a no-op
     res_noop = publish_git_repo(tmp_path, commit_message="test: noop", push=False)
     assert res_noop == Ok(False)
+
+
+def test_schema_org_html_parser_handles_arbitrary_attribute_order_and_multiline_tags() -> None:
+    html_doc = """
+    <!doctype html>
+    <html>
+      <head>
+        <title>Fallback HTML Title</title>
+        <meta
+          data-rh="true"
+          content="Linear Algebra &amp; Differential Equations"
+          property="og:title"
+        >
+        <meta content='https://cdn.example.org/mit.png' id="og-img" property='og:image'>
+        <script nonce="abc123" type="application/ld+json; charset=utf-8">
+        {
+          "@graph": [
+            {
+              "@type": ["Course", "LearningResource"],
+              "name": "18.06 Linear Algebra",
+              "description": "Gilbert Strang's classic MIT lecture series.",
+              "instructor": ["Prof. Gilbert Strang"],
+              "itemListElement": [
+                {"@type": "ListItem", "item": {"name": "The Geometry of Linear Equations"}},
+                {"@type": "ListItem", "item": {"name": "Elimination with Matrices"}}
+              ]
+            }
+          ]
+        }
+        </script>
+      </head>
+    </html>
+    """
+    meta = parse_web_media_html(html_doc, "https://ocw.mit.edu/courses/18-06-linear-algebra/")
+    assert meta.collection == "MIT OpenCourseWare"
+    assert meta.title == "18.06 Linear Algebra"
+    assert meta.creator == "Prof. Gilbert Strang"
+    assert meta.poster == "https://cdn.example.org/mit.png"
+    assert len(meta.episodes) == 2
+    assert meta.episodes[0].title == "The Geometry of Linear Equations"
+    assert meta.episodes[1].title == "Elimination with Matrices"
+
+
+def test_archive_org_provider_and_routing() -> None:
+    ia_json = json.dumps(
+        {
+            "metadata": {
+                "title": "Night of the Living Dead (1968)",
+                "creator": "George A. Romero",
+                "description": "<p>Classic public-domain <b>horror</b> feature film.</p>",
+                "subject": "horror; public domain; zombies",
+            },
+            "files": [
+                {
+                    "name": "Night_of_the_Living_Dead_1080p.mp4",
+                    "source": "original",
+                    "length": "5760",
+                },
+                {
+                    "name": "Night_of_the_Living_Dead.ogv",
+                    "source": "derivative",
+                    "length": "5760",
+                },
+            ],
+        }
+    )
+    meta = parse_archive_org_metadata_json(ia_json, "night_of_the_living_dead")
+    assert meta is not None
+    assert meta.stremio_id == "sw_ia_night_of_the_living_dead"
+    assert meta.collection == "Internet Archive"
+    assert meta.media_type == "movie"
+    assert meta.creator == "George A. Romero"
+    assert meta.description == "Classic public-domain horror feature film."
+    assert "Horror" in meta.genres
+
+    # Verify resolve_media_metadata routes archive.org/details/<id> to InternetArchiveMetadataProvider
+    requested_urls: list[str] = []
+
+    def fake_fetch(u: str) -> str | None:
+        requested_urls.append(u)
+        return ia_json
+
+    routed = resolve_media_metadata(
+        "Night of the Living Dead",
+        (TorrentFileEntry(index=0, name="Night_of_the_Living_Dead_1080p.mp4", size_bytes=100),),
+        fake_fetch,
+        explicit_url="https://archive.org/details/night_of_the_living_dead",
+    )
+    assert routed is not None
+    assert routed.stremio_id == "sw_ia_night_of_the_living_dead"
+    assert requested_urls == ["https://archive.org/metadata/night_of_the_living_dead"]
+
+
+def test_sidecar_metadata_provider_toml_and_json(tmp_path: Path) -> None:
+    toml_sidecar = tmp_path / "course.toml"
+    toml_sidecar.write_text(
+        '[metadata]\n'
+        'title = "Distributed Systems Seminar"\n'
+        'collection = "Computer Science"\n'
+        'creator = "Dr. Leslie Lamport"\n'
+        'description = " clocks, state machines, and consensus."\n'
+        'genres = ["Systems", "Theory"]\n'
+        "\n"
+        "[[episodes]]\n"
+        "number = 1\n"
+        'title = "Time, Clocks, and the Ordering of Events"\n'
+        "duration_seconds = 3200\n"
+        "\n"
+        "[[episodes]]\n"
+        "number = 2\n"
+        'title = "The Part-Time Parliament (Paxos)"\n'
+        "duration_seconds = 3500\n",
+        encoding="utf-8",
+    )
+    files = (
+        TorrentFileEntry(index=0, name="01 - Time Clocks.mp4", size_bytes=1000),
+        TorrentFileEntry(index=1, name="02 - Paxos.mp4", size_bytes=1000),
+    )
+    resolved = resolve_media_metadata(
+        "Distributed Systems",
+        files,
+        lambda _: None,
+        explicit_url=str(toml_sidecar),
+    )
+    assert resolved is not None
+    assert resolved.title == "Distributed Systems Seminar"
+    assert resolved.collection == "Computer Science"
+    assert resolved.creator == "Dr. Leslie Lamport"
+    assert resolved.media_type == "series"
+    assert len(resolved.episodes) == 2
+    assert resolved.episodes[1].title == "The Part-Time Parliament (Paxos)"
+
+    json_meta = parse_sidecar_metadata(
+        json.dumps(
+            {
+                "title": "Indie Short Film",
+                "collection": "Festival Shorts",
+                "media_type": "movie",
+            }
+        ),
+        fmt="json",
+    )
+    assert json_meta is not None
+    assert json_meta.media_type == "movie"
+    assert json_meta.collection == "Festival Shorts"
+
+
+def test_discover_plugin_metadata_providers_handles_custom_entry_points(monkeypatch: Any) -> None:
+    class _DummyPluginProvider:
+        @property
+        def name(self) -> str:
+            return "Dummy Plugin"
+
+        @property
+        def is_fallback(self) -> bool:
+            return False
+
+        def can_handle(
+            self,
+            display_title: str,
+            explicit_url: str | None = None,
+            explicit_slug: str | None = None,
+        ) -> bool:
+            _ = display_title, explicit_url
+            return explicit_slug == "plugin:demo"
+
+        def resolve_metadata(
+            self,
+            display_title: str,
+            files: Any,
+            fetch_html: Any,
+            *,
+            torrent_id: int = 0,
+            explicit_url: str | None = None,
+            explicit_slug: str | None = None,
+        ) -> Any:
+            _ = display_title, files, fetch_html, torrent_id, explicit_url, explicit_slug
+            return None
+
+    class _FakeEntryPoint:
+        def load(self) -> Any:
+            return _DummyPluginProvider
+
+    monkeypatch.setattr(
+        "importlib.metadata.entry_points",
+        lambda group: [_FakeEntryPoint()] if group == "contraband.metadata_providers" else [],
+    )
+    plugins = discover_plugin_metadata_providers()
+    assert len(plugins) == 1
+    assert plugins[0].name == "Dummy Plugin"
+

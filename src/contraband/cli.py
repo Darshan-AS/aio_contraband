@@ -55,10 +55,7 @@ from contraband.effects.storage import (
     read_addon_virtual_fs,
     read_json_file,
 )
-from contraband.providers.metadata import (
-    DEFAULT_METADATA_PROVIDERS,
-    resolve_media_metadata,
-)
+from contraband.providers.metadata import resolve_media_metadata
 from contraband.providers.protocols import (
     DebridProviderProtocol,
     HtmlFetcher,
@@ -217,7 +214,7 @@ def resolve_bound_media_item(
     torrent_id: int,
     files: Sequence[TorrentFileEntry],
     fetch_html: HtmlFetcher,
-    parsers: Sequence[MetadataProviderProtocol] = DEFAULT_METADATA_PROVIDERS,
+    parsers: Sequence[MetadataProviderProtocol] | None = None,
     explicit_url: str | None = None,
     explicit_slug: str | None = None,
     collection_override: str | None = None,
@@ -280,7 +277,7 @@ def weave_media_into_addon(
     files: Sequence[TorrentFileEntry],
     addon_dir: Path,
     fetch_html: HtmlFetcher,
-    parsers: Sequence[MetadataProviderProtocol] = DEFAULT_METADATA_PROVIDERS,
+    parsers: Sequence[MetadataProviderProtocol] | None = None,
     explicit_url: str | None = None,
     explicit_slug: str | None = None,
     collection_override: str | None = None,
@@ -835,11 +832,15 @@ def cmd_add(
     ] = None,
     url: Annotated[
         str | None,
-        typer.Option("--url", help="Webpage URL to scrape metadata from (courses, specials, IMDb/TMDB, YouTube)"),
+        typer.Option("--url", help="Webpage URL to scrape metadata from (Archive.org, courses, specials, IMDb/TMDB, YouTube)"),
+    ] = None,
+    meta_file: Annotated[
+        Path | None,
+        typer.Option("--meta-file", help="Path to a local .toml or .json metadata sidecar file"),
     ] = None,
     slug: Annotated[
         str | None,
-        typer.Option("--slug", help="Item slug override (e.g. 'napoleon')"),
+        typer.Option("--slug", help="Item slug override (e.g. 'napoleon' or 'ia:night_of_the_living_dead')"),
     ] = None,
     collection: Annotated[
         str | None,
@@ -858,6 +859,12 @@ def cmd_add(
     """Add magnet links, .md lists, or .torrent files to TorBox and weave Contraband metadata."""
     addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     resolved_mtype = _parse_media_type_option(media_type)
+    if meta_file is not None:
+        resolved_meta_path = meta_file.expanduser().resolve()
+        if not resolved_meta_path.is_file():
+            err_console.print(f"❌ Metadata sidecar file not found: {resolved_meta_path}")
+            raise typer.Exit(code=1)
+        url = str(resolved_meta_path)
 
     match _expand_cli_targets(targets or [], from_file=from_file):
         case Err(err):
@@ -1148,11 +1155,15 @@ def cmd_build(
     ] = "",
     slug: Annotated[
         str | None,
-        typer.Option("--slug", help="Optional item slug (e.g. 'napoleon')"),
+        typer.Option("--slug", help="Optional item slug (e.g. 'napoleon' or 'ia:night_of_the_living_dead')"),
     ] = None,
     url: Annotated[
         str | None,
-        typer.Option("--url", help="Optional webpage URL (MasterClass, Wondrium, IMDb, YouTube, etc.)"),
+        typer.Option("--url", help="Optional webpage URL (Archive.org, MasterClass, Wondrium, IMDb, YouTube, etc.)"),
+    ] = None,
+    meta_file: Annotated[
+        Path | None,
+        typer.Option("--meta-file", help="Path to a local .toml or .json metadata sidecar file"),
     ] = None,
     collection: Annotated[
         str | None,
@@ -1179,6 +1190,12 @@ def cmd_build(
     """Build static Stremio metadata for Contraband (courses, specials, documentaries, series, or movies)."""
     addon_dir, env, addon_cfg = _resolve_context(workspace_dir)
     resolved_mtype = _parse_media_type_option(media_type)
+    if meta_file is not None:
+        resolved_meta_path = meta_file.expanduser().resolve()
+        if not resolved_meta_path.is_file():
+            err_console.print(f"❌ Metadata sidecar file not found: {resolved_meta_path}")
+            raise typer.Exit(code=1)
+        url = str(resolved_meta_path)
 
     with HttpxClient() as http_client:
         api_key = env.get("SECRET_TORBOX_API_KEY", "")
