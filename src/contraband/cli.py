@@ -48,6 +48,11 @@ from contraband.core.types import (
 )
 from contraband.effects.git import publish_git_repo
 from contraband.effects.http import HttpClientProtocol, HttpxClient
+from contraband.effects.server import (
+    DEFAULT_SERVE_HOST,
+    DEFAULT_SERVE_PORT,
+    create_addon_http_server,
+)
 from contraband.effects.storage import (
     load_addon_config,
     load_env_with_fallback,
@@ -1573,6 +1578,77 @@ def cmd_doctor(
     if report.has_fs_drift and not fix:
         console.print("\n💡 Tip: Run `cb doctor --fix` to recompile and prune out-of-sync static files.")
     raise typer.Exit(code=1)
+
+
+@app.command("serve")
+def cmd_serve(
+    host: Annotated[
+        str,
+        typer.Option("--host", help="Bind address (defaults to loopback 127.0.0.1)"),
+    ] = DEFAULT_SERVE_HOST,
+    port: Annotated[
+        int,
+        typer.Option("--port", "-p", help="TCP port to listen on"),
+    ] = DEFAULT_SERVE_PORT,
+    cors_origins: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--cors-origin",
+            help="Additional trusted Origin URLs to allow via CORS (repeatable)",
+        ),
+    ] = None,
+    allow_any_origin: Annotated[
+        bool,
+        typer.Option(
+            "--allow-any-origin",
+            help="Emit Access-Control-Allow-Origin: * (opt-in for smart-TV WebViews sending Origin: null)",
+        ),
+    ] = False,
+    workspace_dir: AddonDirOption = None,
+) -> None:
+    """Serve the static Stremio addon locally over HTTP (`http://127.0.0.1:8787/manifest.json`) without GitHub."""
+    addon_dir, _, addon_cfg = _resolve_context(workspace_dir)
+    if not (addon_dir / "manifest.json").is_file():
+        idx = load_catalog_index(addon_dir)
+        if isinstance(
+            mat_err := commit_catalog_index(addon_dir, idx, addon_config=addon_cfg), Err
+        ):
+            err_console.print(f"❌ {mat_err.error}")
+            raise typer.Exit(code=1)
+
+    if allow_any_origin:
+        err_console.print(
+            "⚠️  [Security] --allow-any-origin enabled; wildcard CORS ('*') is active on static addon JSON routes."
+        )
+    if host not in ("127.0.0.1", "localhost", "::1"):
+        err_console.print(
+            f"⚠️  [Security] Binding to non-loopback interface '{host}' exposes static catalog metadata on your LAN."
+        )
+
+    try:
+        server = create_addon_http_server(
+            addon_dir,
+            host=host,
+            port=port,
+            extra_cors_origins=cors_origins or (),
+            allow_any_origin=allow_any_origin,
+        )
+    except OSError as exc:
+        err_console.print(f"❌ Failed to bind HTTP server on {host}:{port}: {exc}")
+        raise typer.Exit(code=1) from None
+
+    bound_host, bound_port = server.server_address[:2]
+    display_host = "127.0.0.1" if bound_host == "0.0.0.0" else str(bound_host)
+    console.print(
+        f"🌐 Serving '{addon_cfg.name}' ({addon_dir.name}/) at http://{display_host}:{bound_port}/manifest.json"
+    )
+    console.print("   Press Ctrl+C to stop.")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        console.print("\n👋 Stopped Contraband HTTP server.")
+    finally:
+        server.server_close()
 
 
 @app.command("publish")
